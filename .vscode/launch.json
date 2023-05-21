@@ -1,0 +1,17 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["--root_path", "/home/jsnarvasa/train_npz_new_224", "--output", "/home/jsnarvasa/TS-SAM/SAMed/output", "--n_gpu", "1", "--batch_size", "1", "--num_workers", "0", "--warmup", "--AdamW"]
+        }
+    ]
+}

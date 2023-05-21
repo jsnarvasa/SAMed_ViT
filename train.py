@@ -53,6 +53,7 @@ parser.add_argument('--warmup_period', type=int, default=250,
 parser.add_argument('--AdamW', action='store_true', help='If activated, use AdamW to finetune SAM model')
 parser.add_argument('--module', type=str, default='sam_lora_image_encoder')
 parser.add_argument('--dice_param', type=float, default=0.8)
+parser.add_argument('--num_workers', type=int, default=0)
 args = parser.parse_args()
 
 if __name__ == "__main__":
