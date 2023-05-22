@@ -5,13 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Python: Current File (Linux)",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": ["--root_path", "/home/jsnarvasa/train_npz_new_224", "--output", "/home/jsnarvasa/TS-SAM/SAMed/output", "--n_gpu", "1", "--batch_size", "1", "--num_workers", "0", "--warmup", "--AdamW"]
+        },
+        {
+            "name": "Python: Current File (Mac)",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["--root_path", "/Users/jsnarvasa/Documents/Repo/Data/train_npz_new_224", "--output", "/Users/jsnarvasa/Documents/Repo/SAMed/output", "--n_gpu", "1", "--batch_size", "1", "--num_workers", "0", "--warmup", "--AdamW"]
         }
     ]
 }
