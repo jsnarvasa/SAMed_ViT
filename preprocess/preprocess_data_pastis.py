@@ -38,6 +38,6 @@ for npy_file in S2_npy_files:
 
 with open(os.path.join(FILE_LISTS_PATH, FILE_LISTS_NAME), 'w') as f:
     for patch in S2_npy_files:
-        f.write(patch + '\n')
+        f.write(patch.replace('.npy', '.npz') + '\n')
 
 print(f'Conversion of S2 files to .npz successful and txt file created in {FILE_LISTS_PATH}')
