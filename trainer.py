@@ -5,6 +5,7 @@ import random
 import sys
 import time
 import math
+import datetime
 import numpy as np
 import torch
 import torch.nn as nn
@@ -69,6 +70,9 @@ def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
     best_performance = 0.0
     iterator = tqdm(range(max_epoch), ncols=70)
     for epoch_num in iterator:
+        start_time = datetime.datetime.now()
+        print(f'Starting epoch number {epoch_num} out of {max_epoch}')
+
         for i_batch, sampled_batch in enumerate(trainloader):
             image_batch, label_batch = sampled_batch['image'], sampled_batch['label']  # [b, c, h, w], [b, h, w]
             low_res_label_batch = sampled_batch['low_res_label']
@@ -103,13 +107,14 @@ def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
             logging.info('iteration %d : loss : %f, loss_ce: %f, loss_dice: %f' % (iter_num, loss.item(), loss_ce.item(), loss_dice.item()))
 
             if iter_num % 20 == 0:
-                image = image_batch[1, 0:1, :, :]
+                batch_item_num = 0
+                image = image_batch[batch_item_num, 0:1, :, :]
                 image = (image - image.min()) / (image.max() - image.min())
                 writer.add_image('train/Image', image, iter_num)
                 output_masks = outputs['masks']
                 output_masks = torch.argmax(torch.softmax(output_masks, dim=1), dim=1, keepdim=True)
-                writer.add_image('train/Prediction', output_masks[1, ...] * 50, iter_num)
-                labs = label_batch[1, ...].unsqueeze(0) * 50
+                writer.add_image('train/Prediction', output_masks[batch_item_num, ...] * 50, iter_num)
+                labs = label_batch[batch_item_num, ...].unsqueeze(0) * 50
                 writer.add_image('train/GroundTruth', labs, iter_num)
 
         save_interval = 20 # int(max_epoch/6)
@@ -130,6 +135,10 @@ def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
             logging.info("save model to {}".format(save_mode_path))
             iterator.close()
             break
+
+        end_time = datetime.datetime.now()
+        delta = (end_time - start_time)
+        print(f'Time taken for epoch {epoch_num}: {delta.total_seconds()/60} mins')
 
     writer.close()
     return "Training Finished!"
