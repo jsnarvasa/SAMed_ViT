@@ -31,13 +31,15 @@ for npy_file in S2_npy_files:
         continue
 
     np.savez(
-        os.path.join(SAVE_PATH, f'{patch_id}.npz'),
+        os.path.join(SAVE_PATH, f'S2_{patch_id}.npz'),
         label = S2_semantic_labels,
         image = S2_image[0,0,:,:], # note that we are getting the first observation, and the first channel here
     )
 
 with open(os.path.join(FILE_LISTS_PATH, FILE_LISTS_NAME), 'w') as f:
     for patch in S2_npy_files:
-        f.write(patch.replace('.npy', '.npz') + '\n')
+        # Removing the .npy suffix from the text file, since just need S2_{patch_id}
+        # The train.py script will be responsible for appending the .npz extension to the filenames
+        f.write(patch.replace('.npy', '') + '\n')
 
 print(f'Conversion of S2 files to .npz successful and txt file created in {FILE_LISTS_PATH}')
