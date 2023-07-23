@@ -18,6 +18,8 @@
                 "--batch_size", "1", 
                 "--num_workers", "0", 
                 "--list_dir", "./lists/lists_PASTIS",
+                "--num_classes", "19",
+                "--img_size", "128",
                 "--warmup", 
                 "--AdamW"]
         },
