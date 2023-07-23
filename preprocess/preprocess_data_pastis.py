@@ -36,7 +36,7 @@ for npy_file in S2_npy_files:
         image = S2_image[0,0,:,:], # note that we are getting the first observation, and the first channel here
     )
 
-with open(os.path.join(FILE_LISTS_PATH, FILE_LISTS_NAME)) as f:
+with open(os.path.join(FILE_LISTS_PATH, FILE_LISTS_NAME), 'w') as f:
     for patch in S2_npy_files:
         f.write(patch + '\n')
 
