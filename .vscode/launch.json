@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File (Linux)",
+            "name": "Train (Linux)",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "/home/narvjes/repos/SAMed/train.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
@@ -22,6 +22,22 @@
                 "--img_size", "128",
                 "--warmup", 
                 "--AdamW"]
+        },
+        {
+            "name": "Test (Linux)",
+            "type": "python",
+            "request": "launch",
+            "program": "/home/narvjes/repos/SAMed/test.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--num_classes", "19",
+                "--list_dir", "./lists/lists_PASTIS",
+                "--img_size", "128",
+                "--ckpt", "/home/narvjes/repos/SAMed/checkpoints/sam_vit_b_01ec64.pth",
+                "--lora_ckpt", "/home/narvjes/repos/SAMed/output/Synapse_128_pretrain_vit_b_epo200_bs1_lr0.005/epoch_159.pth",
+                "--is_savenii"
+            ]
         },
         {
             "name": "Python: Current File (Mac)",
