@@ -17,7 +17,28 @@ from datasets.dataset_synapse import Synapse_dataset
 from icecream import ic
 
 
-class_to_name = {1: 'spleen', 2: 'right kidney', 3: 'left kidney', 4: 'gallbladder', 5: 'liver', 6: 'stomach', 7: 'aorta', 8: 'pancreas'}
+# class_to_name = {1: 'spleen', 2: 'right kidney', 3: 'left kidney', 4: 'gallbladder', 5: 'liver', 6: 'stomach', 7: 'aorta', 8: 'pancreas'}
+class_to_name = {
+    0: 'background',
+    1: 'meadow',
+    2: 'soft winter wheat',
+    3: 'corn',
+    4: 'winter barley',
+    5: 'winter rapeseed',
+    6: 'spring barley',
+    7: 'sunflower',
+    8: 'grapevine',
+    9: 'beet',
+    10: 'winter triticale',
+    11: 'winter durum wheat',
+    12: 'fruits, veges flowers',
+    13: 'potatoes',
+    14: 'leguminous fodder',
+    15: 'soybeans',
+    16: 'orchard',
+    17: 'mixed cereal',
+    18: 'sorghum'
+}
 
 
 def inference(args, multimask_output, db_config, model, test_save_path=None):
