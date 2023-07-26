@@ -31,12 +31,20 @@ for npy_file in S2_npy_files:
     # NDVI Channels
     near_infrared_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[0,6,:,:]
     red_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[0,2,:,:]
-    ndvi_channel = (near_infrared_channel - red_channel)/(near_infrared_channel + red_channel)
+    ndvi_channel = np.divide(
+        (near_infrared_channel - red_channel).astype('float64'),
+        (near_infrared_channel + red_channel).astype('float64'),
+        out=np.zeros_like(near_infrared_channel.astype('float64')),
+        where=(near_infrared_channel + red_channel) !=0
+    )
 
     
     # Note that we are getting the first observation (index 0) of the S2 image
     S2_image = ndvi_channel
     S2_image_normalised = (S2_image - MIN_VALUE)/(MAX_VALUE - MIN_VALUE)
+
+    # Clip the values to be between 0 and 1, since they would be extreme from the normalised NDVI values
+    S2_image_normalised = np.clip(S2_image_normalised, 0, 1)
 
     # Note that the reason we are getting the 0th channel
     # is because channel 0 for TARGET files is the semantic labels
