@@ -10,8 +10,8 @@ FILE_LISTS_PATH = '/home/narvjes/repos/SAMed/lists/lists_PASTIS'
 FILE_LISTS_NAME = 'train.txt'
 
 # Source: https://docs.digitalearthafrica.org/en/latest/data_specs/Sentinel-2_Level-2A_specs.html
-MIN_VALUE = 0
-MAX_VALUE = 10000
+MIN_VALUE = -1
+MAX_VALUE = 1
 
 
 if not os.path.exists(SAVE_PATH):
@@ -27,9 +27,15 @@ S2_npy_files_filtered = copy.deepcopy(S2_npy_files)
 for npy_file in S2_npy_files:
     print(f'Processing file {npy_file}')
     patch_id = npy_file.replace('S2_', '').replace('.npy', '')
+
+    # NDVI Channels
+    near_infrared_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[0,6,:,:]
+    red_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[0,2,:,:]
+    ndvi_channel = (near_infrared_channel - red_channel)/(near_infrared_channel + red_channel)
+
     
-    # Note that we are getting the first observation, and the first channel here
-    S2_image = np.load(os.path.join(IMAGE_PATH, npy_file))[0,0,:,:]
+    # Note that we are getting the first observation (index 0) of the S2 image
+    S2_image = ndvi_channel
     S2_image_normalised = (S2_image - MIN_VALUE)/(MAX_VALUE - MIN_VALUE)
 
     # Note that the reason we are getting the 0th channel
