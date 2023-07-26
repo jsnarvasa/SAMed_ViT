@@ -102,3 +102,17 @@ If you have any questions, please contact us via
 
 ## Acknowledgement
 We appreciate the developers of [Segment Anything Model](https://github.com/facebookresearch/segment-anything) and the provider of the [Synapse multi-organ segmentation dataset](https://www.synapse.org/#!Synapse:syn3193805/wiki/217789). The code of SAMed is built upon [TransUnet](https://github.com/Beckschen/TransUNet) and [SAM LoRA](https://github.com/JamesQFreeman/Sam_LoRA), and we express our gratitude to these awesome projects.
+
+
+
+# Jesse Updates
+
+Preprocessing command
+```bash
+nohup python preprocess/preprocess_data_pastis.py > 20230726_preprocess.log 2>&1 &
+```
+
+Training command
+```bash
+nohup python train.py  --root_path /home/narvjes/data/PASTIS/SAMed --output /home/narvjes/repos/SAMed/output --n_gpu 1 --batch_size 1  --num_workers 0 --list_dir ./lists/lists_PASTIS --num_classes 19 --img_size 128 --warmup --AdamW > 20230726_PASTIS_run.log 2>&1 &
+```
