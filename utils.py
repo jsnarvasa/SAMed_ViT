@@ -177,4 +177,10 @@ def test_single_volume(image, label, net, classes, multimask_output, patch_size=
         sitk.WriteImage(prd_itk, test_save_path + '/' + case + "_pred.nii.gz")
         sitk.WriteImage(img_itk, test_save_path + '/' + case + "_img.nii.gz")
         sitk.WriteImage(lab_itk, test_save_path + '/' + case + "_gt.nii.gz")
+
+        # Also save numpy file
+        np.save(os.path.join(test_save_path, case + '_pred.npy'), prediction.astype(np.float32))
+        np.save(os.path.join(test_save_path, case + '_img.npy'), image.astype(np.float32))
+        np.save(os.path.join(test_save_path, case + '_lab.npy'), label.astype(np.float32))
+                
     return metric_list

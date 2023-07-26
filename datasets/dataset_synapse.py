@@ -69,6 +69,11 @@ class Synapse_dataset(Dataset):
             data_path = os.path.join(self.data_dir, slice_name+'.npz')
             data = np.load(data_path)
             image, label = data['image'], data['label']
+        elif self.split == "pastis_test_vol":
+            slice_name = self.sample_list[idx].strip('\n')
+            data_path = os.path.join(self.data_dir, slice_name+'.npz')
+            data = np.load(data_path)
+            image, label = data['image'], data['label'].astype('uint8')
         else:
             vol_name = self.sample_list[idx].strip('\n')
             filepath = self.data_dir + "/{}.npy.h5".format(vol_name)

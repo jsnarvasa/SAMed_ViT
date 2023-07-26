@@ -36,7 +36,8 @@
                 "--img_size", "128",
                 "--ckpt", "/home/narvjes/repos/SAMed/checkpoints/sam_vit_b_01ec64.pth",
                 "--lora_ckpt", "/home/narvjes/repos/SAMed/output/Synapse_128_pretrain_vit_b_epo200_bs1_lr0.005/epoch_159.pth",
-                "--output", "/home/narvjes/repos/SAMed/output/test",
+                "--output_dir", "/home/narvjes/repos/SAMed/output/test",
+                "--volume_path", "/home/narvjes/data/PASTIS/SAMed",
                 "--is_savenii"
             ]
         },
