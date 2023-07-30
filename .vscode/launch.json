@@ -18,7 +18,7 @@
                 "--batch_size", "1", 
                 "--num_workers", "0", 
                 "--list_dir", "./lists/lists_PASTIS",
-                "--num_classes", "19",
+                "--num_classes", "20",
                 "--img_size", "128",
                 "--warmup", 
                 "--AdamW"]
@@ -31,7 +31,7 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--num_classes", "19",
+                "--num_classes", "20",
                 "--list_dir", "./lists/lists_PASTIS",
                 "--img_size", "128",
                 "--ckpt", "/home/narvjes/repos/SAMed/checkpoints/sam_vit_b_01ec64.pth",

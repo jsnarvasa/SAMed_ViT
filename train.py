@@ -5,6 +5,7 @@ import random
 import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
+import datetime
 
 from importlib import import_module
 
@@ -87,6 +88,10 @@ if __name__ == "__main__":
     snapshot_path = snapshot_path + '_bs' + str(args.batch_size)
     snapshot_path = snapshot_path + '_lr' + str(args.base_lr) if args.base_lr != 0.01 else snapshot_path
     snapshot_path = snapshot_path + '_s' + str(args.seed) if args.seed != 1234 else snapshot_path
+
+    current_date = datetime.date.today()
+    snapshot_path = snapshot_path + f'_{str(current_date)}'
+
 
     if not os.path.exists(snapshot_path):
         os.makedirs(snapshot_path)
