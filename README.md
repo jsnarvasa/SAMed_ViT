@@ -115,12 +115,16 @@ nohup python preprocess/preprocess_data_pastis.py > 20230726_preprocess.log 2>&1
 Training command
 ```bash
 nohup python train.py  --root_path /home/narvjes/data/PASTIS/SAMed --output /home/narvjes/repos/SAMed/output --n_gpu 1 --batch_size 1  --num_workers 0 --list_dir ./lists/lists_PASTIS --num_classes 20 --img_size 128 --warmup --AdamW > 20230727_PASTIS_run.log 2>&1 &
+
+nohup python train.py  --root_path /home/narvjes/data/PASTIS/SAMed --output /home/narvjes/repos/SAMed-jnar/output --n_gpu 1 --batch_size 22 --list_dir ./lists/lists_PASTIS --num_classes 20 --img_size 128 --stop_epoch 200 --warmup --AdamW > 20230731_PASTIS_run.log 2>&1 &
 ```
 
 Testing command
 ```bash
 nohup python test.py --num_classes 20 --list_dir ./lists/lists_PASTIS --img_size 128 --ckpt /home/narvjes/repos/SAMed/checkpoints/sam_vit_b_01e
 c64.pth --lora_ckpt /home/narvjes/repos/SAMed/output/Synapse_128_pretrain_vit_b_epo200_bs1_lr0.005/epoch_159.pth --output_dir /home/narvjes/repos/SAMed/output/test --volume_path /home/narvjes/data/PASTIS/SAMed --is_savenii > 20230729_PASTIS_test.log 2>&1 &
+
+nohup python test.py --num_classes 20 --list_dir ./lists/lists_PASTIS --img_size 128 --ckpt /home/narvjes/repos/SAMed-jnar/checkpoints/sam_vit_b_01ec64.pth --lora_ckpt '/home/narvjes/repos/SAMed-jnar/output/Synapse_128_pretrain_vit_b_epo200_bs22_lr0.005_2023-07-30/epoch_199.pth' --output_dir /home/narvjes/repos/SAMed-jnar/output/test --volume_path /home/narvjes/data/PASTIS/SAMed --is_savenii > 20230731_PASTIS_test.log 2>&1 &
 ```
 
 Checking Tensorboard
