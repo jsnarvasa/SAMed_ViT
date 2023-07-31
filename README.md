@@ -120,8 +120,7 @@ nohup python train.py  --root_path /home/narvjes/data/PASTIS/SAMed --output /hom
 Testing command
 ```bash
 nohup python test.py --num_classes 20 --list_dir ./lists/lists_PASTIS --img_size 128 --ckpt /home/narvjes/repos/SAMed/checkpoints/sam_vit_b_01e
-c64.pth --lora_ckpt /home/narvjes/repos/SAMed/output/Synapse_128_pretrain_vit_b_epo200_bs1_lr0.005/epoch_159.pth --output_dir /home/narvjes/repos/SAMed/output/test --volume_path /home/na
-rvjes/data/PASTIS/SAMed --is_savenii > 20230729_PASTIS_test.log 2>&1 &
+c64.pth --lora_ckpt /home/narvjes/repos/SAMed/output/Synapse_128_pretrain_vit_b_epo200_bs1_lr0.005/epoch_159.pth --output_dir /home/narvjes/repos/SAMed/output/test --volume_path /home/narvjes/data/PASTIS/SAMed --is_savenii > 20230729_PASTIS_test.log 2>&1 &
 ```
 
 Checking Tensorboard
