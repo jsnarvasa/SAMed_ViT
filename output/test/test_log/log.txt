@@ -1,0 +1,44 @@
+[02:37:18.679] Namespace(ckpt='/home/narvjes/repos/SAMed-jnar/checkpoints/sam_vit_b_01ec64.pth', config=None, dataset='Synapse', deterministic=1, img_size=128, input_size=224, is_savenii=True, list_dir='./lists/lists_PASTIS', lora_ckpt='/home/narvjes/repos/SAMed-jnar/output/Synapse_128_pretrain_vit_b_epo200_bs22_lr0.005_2023-07-30/epoch_199.pth', module='sam_lora_image_encoder', num_classes=20, output_dir='/home/narvjes/repos/SAMed-jnar/output/test', rank=4, seed=1234, vit_name='vit_b', volume_path='/home/narvjes/data/PASTIS/SAMed')
+[02:37:18.679] 20 test iterations per epoch
+[02:37:18.794] idx 0 case S2_10034 mean_dice 0.003240 mean_hd95 8.088209
+[02:37:18.830] idx 1 case S2_40556 mean_dice 0.037231 mean_hd95 10.110890
+[02:37:18.868] idx 2 case S2_30322 mean_dice 0.186392 mean_hd95 14.201838
+[02:37:18.899] idx 3 case S2_20456 mean_dice 0.022134 mean_hd95 8.590271
+[02:37:18.925] idx 4 case S2_20471 mean_dice 0.000000 mean_hd95 0.000000
+[02:37:18.960] idx 5 case S2_10041 mean_dice 0.079746 mean_hd95 3.419762
+[02:37:18.991] idx 6 case S2_40450 mean_dice 0.046937 mean_hd95 1.918942
+[02:37:19.027] idx 7 case S2_20239 mean_dice 0.144718 mean_hd95 5.853955
+[02:37:19.064] idx 8 case S2_40420 mean_dice 0.152757 mean_hd95 7.575282
+[02:37:19.103] idx 9 case S2_30120 mean_dice 0.073838 mean_hd95 11.842415
+[02:37:19.133] idx 10 case S2_20583 mean_dice 0.131338 mean_hd95 4.774022
+[02:37:19.168] idx 11 case S2_40046 mean_dice 0.160714 mean_hd95 5.849711
+[02:37:19.201] idx 12 case S2_40156 mean_dice 0.065346 mean_hd95 2.081540
+[02:37:19.238] idx 13 case S2_30268 mean_dice 0.096064 mean_hd95 15.796501
+[02:37:19.266] idx 14 case S2_20472 mean_dice 0.033358 mean_hd95 1.067412
+[02:37:19.301] idx 15 case S2_40045 mean_dice 0.059909 mean_hd95 4.414281
+[02:37:19.338] idx 16 case S2_10220 mean_dice 0.144595 mean_hd95 6.778506
+[02:37:19.369] idx 17 case S2_20549 mean_dice 0.039094 mean_hd95 6.159152
+[02:37:19.403] idx 18 case S2_40386 mean_dice 0.096325 mean_hd95 4.025599
+[02:37:19.433] idx 19 case S2_30365 mean_dice 0.019838 mean_hd95 6.821182
+[02:37:19.456] Mean class 1 name meadow mean_dice 0.189266 mean_hd95 11.658813
+[02:37:19.456] Mean class 2 name soft winter wheat mean_dice 0.047710 mean_hd95 13.427827
+[02:37:19.456] Mean class 3 name corn mean_dice 0.235851 mean_hd95 14.211304
+[02:37:19.456] Mean class 4 name winter barley mean_dice 0.057599 mean_hd95 6.525329
+[02:37:19.456] Mean class 5 name winter rapeseed mean_dice 0.064505 mean_hd95 2.112736
+[02:37:19.456] Mean class 6 name spring barley mean_dice 0.128193 mean_hd95 1.752834
+[02:37:19.456] Mean class 7 name sunflower mean_dice 0.057405 mean_hd95 3.216145
+[02:37:19.456] Mean class 8 name grapevine mean_dice 0.068498 mean_hd95 5.294581
+[02:37:19.456] Mean class 9 name beet mean_dice 0.080668 mean_hd95 1.246790
+[02:37:19.456] Mean class 10 name winter triticale mean_dice 0.000000 mean_hd95 0.000000
+[02:37:19.456] Mean class 11 name winter durum wheat mean_dice 0.088635 mean_hd95 3.324022
+[02:37:19.456] Mean class 12 name fruits, veges flowers mean_dice 0.031941 mean_hd95 0.950657
+[02:37:19.456] Mean class 13 name potatoes mean_dice 0.000901 mean_hd95 1.401992
+[02:37:19.457] Mean class 14 name leguminous fodder mean_dice 0.000206 mean_hd95 3.111190
+[02:37:19.457] Mean class 15 name soybeans mean_dice 0.016150 mean_hd95 5.417330
+[02:37:19.457] Mean class 16 name orchard mean_dice 0.073876 mean_hd95 1.922381
+[02:37:19.457] Mean class 17 name mixed cereal mean_dice 0.030608 mean_hd95 2.707669
+[02:37:19.457] Mean class 18 name sorghum mean_dice 0.050381 mean_hd95 3.205438
+[02:37:19.457] Mean class 19 mean_dice 0.371180 mean_hd95 47.882429
+[02:37:19.457] Mean class 20 mean_dice 0.000000 mean_hd95 0.000000
+[02:37:19.457] Testing performance in best val model: mean_dice : 0.079679 mean_hd95 : 6.468473
+[02:37:19.457] Testing Finished!
