@@ -55,6 +55,7 @@ parser.add_argument('--AdamW', action='store_true', help='If activated, use Adam
 parser.add_argument('--module', type=str, default='sam_lora_image_encoder')
 parser.add_argument('--dice_param', type=float, default=0.8)
 parser.add_argument('--num_workers', type=int, default=0)
+parser.add_argument('--temporal_encoder_dim_size', type=int, default=960, help='Dimension size for the temporal encoder')
 args = parser.parse_args()
 
 if __name__ == "__main__":
@@ -103,7 +104,7 @@ if __name__ == "__main__":
                                                                 pixel_std=[1, 1, 1])
 
     pkg = import_module(args.module)
-    net = pkg.LoRA_Sam(sam, args.rank).cuda()
+    net = pkg.LoRA_Sam(sam, args.rank, temporal_encoder_dim_size = args.temporal_encoder_dim_size).cuda()
 
     # net = LoRA_Sam(sam, args.rank).cuda()
     if args.lora_ckpt is not None:

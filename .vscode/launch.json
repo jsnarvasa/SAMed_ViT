@@ -52,11 +52,12 @@
                 "--root_path", "/home/narvjes/data/PASTIS/SAMed_timeseries", 
                 "--output", "/home/narvjes/repos/SAMed-jnar/output", 
                 "--n_gpu", "1", 
-                "--batch_size", "16", 
+                "--batch_size", "4", 
                 "--num_workers", "0", 
                 "--list_dir", "./lists/lists_PASTIS_timeseries",
                 "--num_classes", "20",
                 "--img_size", "128",
+                "--temporal_encoder_dim_size", "960",
                 "--warmup", 
                 "--AdamW"]
         },

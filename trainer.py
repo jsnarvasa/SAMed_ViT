@@ -112,7 +112,7 @@ def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
 
             if iter_num % 20 == 0:
                 batch_item_num = 0
-                image = image_batch[batch_item_num, 0:1, :, :]
+                image = image_batch[batch_item_num, 0, 0:1, :, :]
                 image = (image - image.min()) / (image.max() - image.min())
                 writer.add_image('train/Image', image, iter_num)
                 output_masks = outputs['masks']

@@ -107,17 +107,19 @@ class TimeSeries_ImageEncoderViT(ImageEncoderViT):
         )
     
 
-    def create_temporal_encoder(self) -> None:
+    def create_temporal_encoder(self, dim_size: int) -> None:
         '''
         Create a temporal encoder for the timeseries nature of data
         '''
 
+        self.dim_size = dim_size
+
         self.temporal_encoder = Transformer(
-            dim = 128,
+            dim = self.dim_size,
             depth = 4,
             heads = 4,
             dim_head = 32,
-            mlp_dim = 128*4,
+            mlp_dim = self.dim_size * 4,
             dropout = 0,
         )
 
@@ -136,9 +138,20 @@ class TimeSeries_ImageEncoderViT(ImageEncoderViT):
 
         # Stack the tensors back together into a single timeseries tensor again
         x = torch.stack(timeseries_tensors, dim = 1)
+        x = rearrange(x, 'b n h w d -> b n (h w d)')
+
+        # Cut the first 2048 tokens, due to memory limits
+        # 2048 since we have 8 * 8 * 32 (where 32 was generally the number of tokens representing a pixel in TSViT)
+        x = x[:, :, :self.dim_size]
         
         # Send it to temporal encoder here
         x = self.temporal_encoder(x)
+
+        # Reshaping the tensor to the original shape expected by SAM's image encoder
+        x = rearrange(x, 'b n (h w d) -> b h w (n d)', h=8, w=8)
+
+        # Cutting the first 768 tokens, since this is the original size of the patch embedding generated within SAM
+        x = x[..., :768]
 
         if self.pos_embed is not None:
             x = x + self.pos_embed

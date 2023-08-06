@@ -65,7 +65,7 @@ class LoRA_Sam(nn.Module):
         torch.Size([1, 1000])
     """
 
-    def __init__(self, sam_model: Sam, r: int, lora_layer=None):
+    def __init__(self, sam_model: Sam, r: int, temporal_encoder_dim_size: int, lora_layer=None):
         super(LoRA_Sam, self).__init__()
 
         assert r > 0
@@ -88,7 +88,7 @@ class LoRA_Sam(nn.Module):
         # patch_embed, temporal_encoder for timeseries, blocks, neck
 
         # sam_model.image_encoder = TimeSeries_ImageEncoderViT.create_from_super(sam_model.image_encoder)
-        sam_model.image_encoder.create_temporal_encoder()
+        sam_model.image_encoder.create_temporal_encoder(dim_size=temporal_encoder_dim_size)
 
         # Here, we do the surgery
         for t_layer_i, blk in enumerate(sam_model.image_encoder.blocks):
