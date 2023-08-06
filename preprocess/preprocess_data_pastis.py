@@ -1,13 +1,26 @@
 import os
 import copy
 import numpy as np
+import argparse
 
 
-IMAGE_PATH = '/home/narvjes/data/PASTIS/DATA_S2'
-SEMANTIC_LABEL_PATH = '/home/narvjes/data/PASTIS/ANNOTATIONS'
-SAVE_PATH = '/home/narvjes/data/PASTIS/SAMed'
-FILE_LISTS_PATH = '/home/narvjes/repos/SAMed/lists/lists_PASTIS'
-FILE_LISTS_NAME = 'train.txt'
+parser = argparse.ArgumentParser()
+parser.add_argument('--timeseries', action='store_true',
+                    help='Whether to include timeseries data')
+args = parser.parse_args()
+
+if args.timeseries:
+    IMAGE_PATH = '/home/narvjes/data/PASTIS/DATA_S2'
+    SEMANTIC_LABEL_PATH = '/home/narvjes/data/PASTIS/ANNOTATIONS'
+    SAVE_PATH = '/home/narvjes/data/PASTIS/SAMed_timeseries'
+    FILE_LISTS_PATH = '/home/narvjes/repos/SAMed-jnar/lists/lists_PASTIS_timeseries'
+    FILE_LISTS_NAME = 'train.txt'
+else:
+    IMAGE_PATH = '/home/narvjes/data/PASTIS/DATA_S2'
+    SEMANTIC_LABEL_PATH = '/home/narvjes/data/PASTIS/ANNOTATIONS'
+    SAVE_PATH = '/home/narvjes/data/PASTIS/SAMed'
+    FILE_LISTS_PATH = '/home/narvjes/repos/SAMed-jnar/lists/lists_PASTIS'
+    FILE_LISTS_NAME = 'train.txt'
 
 # Source: https://docs.digitalearthafrica.org/en/latest/data_specs/Sentinel-2_Level-2A_specs.html
 MIN_VALUE = -1
@@ -29,8 +42,16 @@ for npy_file in S2_npy_files:
     patch_id = npy_file.replace('S2_', '').replace('.npy', '')
 
     # NDVI Channels
-    near_infrared_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[0,6,:,:]
-    red_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[0,2,:,:]
+    if args.timeseries:
+        # the shape will be [n_observations, height, width]
+        near_infrared_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[:,6,:,:]
+        red_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[:,2,:,:]
+    else:
+        # the shape will be [height, width]
+        # i.e. there will be no timeseries dimension
+        near_infrared_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[0,6,:,:]
+        red_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[0,2,:,:]
+
     ndvi_channel = np.divide(
         (near_infrared_channel - red_channel).astype('float64'),
         (near_infrared_channel + red_channel).astype('float64'),

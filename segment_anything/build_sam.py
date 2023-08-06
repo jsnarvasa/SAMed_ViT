@@ -12,6 +12,8 @@ from functools import partial
 
 from .modeling import ImageEncoderViT, MaskDecoder, PromptEncoder, Sam, TwoWayTransformer
 
+from timeseries_image_encoder import TimeSeries_ImageEncoderViT
+
 
 def build_sam_vit_h(image_size, num_classes, pixel_mean=[123.675, 116.28, 103.53], pixel_std=[58.395, 57.12, 57.375],
                     checkpoint=None):
@@ -86,7 +88,7 @@ def _build_sam(
     vit_patch_size = 16
     image_embedding_size = image_size // vit_patch_size  # Divide by 16 here
     sam = Sam(
-        image_encoder=ImageEncoderViT(
+        image_encoder=TimeSeries_ImageEncoderViT(
             depth=encoder_depth,
             embed_dim=encoder_embed_dim,
             img_size=image_size,

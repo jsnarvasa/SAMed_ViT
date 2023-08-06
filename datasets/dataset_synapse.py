@@ -12,11 +12,11 @@ from icecream import ic
 
 def random_rot_flip(image, label):
     k = np.random.randint(0, 4)
-    image = np.rot90(image, k)
+    image = np.rot90(image, k, axes=(1, 2))
     label = np.rot90(label, k)
-    axis = np.random.randint(0, 2)
+    axis = np.random.randint(1, 3)
     image = np.flip(image, axis=axis).copy()
-    label = np.flip(label, axis=axis).copy()
+    label = np.flip(label, axis=axis-1).copy()
     return image, label
 
 
@@ -39,17 +39,46 @@ class RandomGenerator(object):
             image, label = random_rot_flip(image, label)
         elif random.random() > 0.5:
             image, label = random_rotate(image, label)
-        x, y = image.shape
+        t, x, y = image.shape
         if x != self.output_size[0] or y != self.output_size[1]:
             image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
             label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
         label_h, label_w = label.shape
         low_res_label = zoom(label, (self.low_res[0] / label_h, self.low_res[1] / label_w), order=0)
-        image = torch.from_numpy(image.astype(np.float32)).unsqueeze(0)
-        image = repeat(image, 'c h w -> (repeat c) h w', repeat=3)
+        image = torch.from_numpy(image.astype(np.float32)).unsqueeze(1)
+        image = repeat(image, 't c h w -> t (repeat c) h w', repeat=3)
         label = torch.from_numpy(label.astype(np.float32))
         low_res_label = torch.from_numpy(low_res_label.astype(np.float32))
         sample = {'image': image, 'label': label.long(), 'low_res_label': low_res_label.long()}
+        return sample
+    
+
+class Pad_Timeseries(object):
+    def __init__(self, dtype=torch.float32):
+
+        self.dtype = dtype
+        return
+    
+
+    def __call__(self, sample):
+        image = sample['image']
+
+        # Get the current length of timeseries observation
+        timeseries_length = image.shape[0]
+
+        diff = 60 - timeseries_length
+
+        if diff > 0:
+            # creates the shape of the padding that we need [diff, channel, height, width]
+            pad_shape = [diff] + list(image.shape)[1:]
+            image = torch.cat((image, torch.zeros(pad_shape, dtype=self.dtype)), dim = 0)
+        elif diff < 0:
+            # if for some reason, we have an instance where the number of timeseries observations is greater than 60
+            # we will just take the first 60 observations
+            image = image[:60, ...]
+
+        
+        sample['image'] = image
         return sample
 
 

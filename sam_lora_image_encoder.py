@@ -1,6 +1,5 @@
 from segment_anything import build_sam, SamPredictor
 from segment_anything import sam_model_registry
-from segment_anything.modeling import ImageEncoderViT
 
 import math
 import torch
@@ -49,39 +48,6 @@ class _LoRA_qkv(nn.Module):
         return qkv
 
 
-class TimeSeries_ImageEncoderViT(ImageEncoderViT):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    
-    @classmethod
-    def create_from_super(cls, superclass_instance: ImageEncoderViT):
-        '''
-        Initialise a TimeSeries_ImageEncoderViT instance
-        based on an existing instance of a ImageEncoderViT class
-        '''
-        return cls(
-            img_size = superclass_instance.img_size,
-            patch_size = superclass_instance.patch_embed.proj.kernel_size[0],
-            in_chans = superclass_instance.patch_embed.proj.in_channels,
-            embed_dim = superclass_instance.patch_embed.proj.out_channels,
-            depth = len(superclass_instance.blocks),
-            num_heads = superclass_instance.blocks[0].attn.num_heads,
-            mlp_ratio = superclass_instance.blocks[0].mlp.lin1.out_features/superclass_instance.blocks[0].mlp.lin1.in_features,
-            out_chans = superclass_instance.neck._modules['2'].out_channels,
-            qkv_bias = torch.is_tensor(superclass_instance.blocks[0].attn.qkv.bias),
-            norm_layer = type(superclass_instance.blocks[0].norm1),
-            act_layer = type(superclass_instance.blocks[0].mlp.act),
-            use_rel_pos = superclass_instance.blocks[0].attn.use_rel_pos,
-            window_size = superclass_instance.blocks[0].window_size,
-        )
-    
-    # def forward(self, x):
-    #     '''
-    #     Need to override the existing forward method within the superclass
-    #     Such that we are able to insert the timeseries transformer processing here
-    #     '''
-
 class LoRA_Sam(nn.Module):
     """Applies low-rank adaptation to a Sam model's image encoder.
 
@@ -121,7 +87,8 @@ class LoRA_Sam(nn.Module):
         # Make adjustment here such that sam_model.image_encoder constitutes
         # patch_embed, temporal_encoder for timeseries, blocks, neck
 
-        sam_model.image_encoder = TimeSeries_ImageEncoderViT.create_from_super(sam_model.image_encoder)
+        # sam_model.image_encoder = TimeSeries_ImageEncoderViT.create_from_super(sam_model.image_encoder)
+        sam_model.image_encoder.create_temporal_encoder()
 
         # Here, we do the surgery
         for t_layer_i, blk in enumerate(sam_model.image_encoder.blocks):
