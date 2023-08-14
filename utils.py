@@ -114,7 +114,8 @@ def calculate_metric_percase(pred, gt):
 def test_single_volume(image, label, net, classes, multimask_output, patch_size=[256, 256], input_size=[224, 224],
                        test_save_path=None, case=None, z_spacing=1):
     image, label = image.squeeze(0).cpu().detach().numpy(), label.squeeze(0).cpu().detach().numpy()
-    if len(image.shape) == 3:
+    # Setting this to some dummy value for now, so it doesn't get hit
+    if len(image.shape) == 10:
         prediction = np.zeros_like(label)
         for ind in range(image.shape[0]):
             slice = image[ind, :, :]
@@ -154,7 +155,19 @@ def test_single_volume(image, label, net, classes, multimask_output, patch_size=
             image = zoom(image, (patch_size[0] / x, patch_size[1] / y), order=3)
         inputs = torch.from_numpy(image).unsqueeze(
             0).unsqueeze(0).float().cuda()
-        inputs = repeat(inputs, 'b c h w -> b (repeat c) h w', repeat=3)
+        inputs = repeat(inputs, 'b c t h w -> b t (repeat c) h w', repeat=3)
+
+        # Pad the timeseries to length of 60, to ensure consistency amongst all test subjects
+        timeseries_length = inputs.shape[1]
+        diff = 60 - timeseries_length
+
+        if diff > 0:
+            # creates the shape of the padding that we need [diff, channel, height, width]
+            pad_shape = [list(inputs.shape)[0]] + [diff] + list(inputs.shape)[2:]
+            inputs = torch.cat((inputs, torch.zeros(pad_shape).cuda()), dim = 1)
+        elif diff < 0:
+            inputs = inputs[:, :60, ...]
+
         net.eval()
         with torch.no_grad():
             outputs = net(inputs, multimask_output, patch_size[0])
@@ -168,7 +181,7 @@ def test_single_volume(image, label, net, classes, multimask_output, patch_size=
         metric_list.append(calculate_metric_percase(prediction == i, label == i))
 
     if test_save_path is not None:
-        img_itk = sitk.GetImageFromArray(image.astype(np.float32))
+        img_itk = sitk.GetImageFromArray(image[0,...].astype(np.float32))
         prd_itk = sitk.GetImageFromArray(prediction.astype(np.float32))
         lab_itk = sitk.GetImageFromArray(label.astype(np.float32))
         img_itk.SetSpacing((1, 1, z_spacing))
@@ -180,7 +193,7 @@ def test_single_volume(image, label, net, classes, multimask_output, patch_size=
 
         # Also save numpy file
         np.save(os.path.join(test_save_path, case + '_pred.npy'), prediction.astype(np.float32))
-        np.save(os.path.join(test_save_path, case + '_img.npy'), image.astype(np.float32))
+        np.save(os.path.join(test_save_path, case + '_img.npy'), image[0,...].astype(np.float32))
         np.save(os.path.join(test_save_path, case + '_lab.npy'), label.astype(np.float32))
                 
     return metric_list

@@ -48,7 +48,7 @@ def inference(args, multimask_output, db_config, model, test_save_path=None):
     model.eval()
     metric_list = 0.0
     for i_batch, sampled_batch in tqdm(enumerate(testloader)):
-        h, w = sampled_batch['image'].shape[1:]
+        t, h, w = sampled_batch['image'].shape[1:]
         image, label, case_name = sampled_batch['image'], sampled_batch['label'], sampled_batch['case_name'][0]
         metric_i = test_single_volume(image, label, model, classes=args.num_classes, multimask_output=multimask_output,
                                       patch_size=[args.img_size, args.img_size], input_size=[args.input_size, args.input_size],
@@ -99,6 +99,7 @@ if __name__ == '__main__':
     parser.add_argument('--vit_name', type=str, default='vit_b', help='Select one vit model')
     parser.add_argument('--rank', type=int, default=4, help='Rank for LoRA adaptation')
     parser.add_argument('--module', type=str, default='sam_lora_image_encoder')
+    parser.add_argument('--temporal_encoder_dim_size', type=int, default=960, help='Dimension size for the temporal encoder')
 
     args = parser.parse_args()
 
@@ -138,7 +139,7 @@ if __name__ == '__main__':
                                                                     pixel_std=[1, 1, 1])
     
     pkg = import_module(args.module)
-    net = pkg.LoRA_Sam(sam, args.rank).cuda()
+    net = pkg.LoRA_Sam(sam, args.rank, temporal_encoder_dim_size = args.temporal_encoder_dim_size).cuda()
 
     assert args.lora_ckpt is not None
     net.load_lora_parameters(args.lora_ckpt)
