@@ -133,6 +133,9 @@ nohup python test.py --num_classes 20 --list_dir ./lists/lists_PASTIS --img_size
 c64.pth --lora_ckpt /home/narvjes/repos/SAMed/output/Synapse_128_pretrain_vit_b_epo200_bs1_lr0.005/epoch_159.pth --output_dir /home/narvjes/repos/SAMed/output/test --volume_path /home/narvjes/data/PASTIS/SAMed --is_savenii > 20230729_PASTIS_test.log 2>&1 &
 
 nohup python test.py --num_classes 20 --list_dir ./lists/lists_PASTIS --img_size 128 --ckpt /home/narvjes/repos/SAMed-jnar/checkpoints/sam_vit_b_01ec64.pth --lora_ckpt '/home/narvjes/repos/SAMed-jnar/output/Synapse_128_pretrain_vit_b_epo200_bs22_lr0.005_2023-07-30/epoch_199.pth' --output_dir /home/narvjes/repos/SAMed-jnar/output/test --volume_path /home/narvjes/data/PASTIS/SAMed --is_savenii > 20230731_PASTIS_test.log 2>&1 &
+
+# For timeseries testing
+python test.py --num_classes 20 --list_dir ./lists/lists_PASTIS_timeseries --img_size 128 --ckpt /home/narvjes/repos/SAMed-jnar/checkpoints/sam_vit_b_01ec64.pth --lora_ckpt /home/narvjes/repos/SAMed-jnar/output/Synapse_128_pretrain_vit_b_epo450_bs4_lr0.005_2023-08-06/epoch_399.pth --output_dir /home/narvjes/repos/SAMed-jnar/output/test --volume_path /home/narvjes/data/PASTIS/SAMed_timeseries --temporal_encoder_dim_size 960 --is_savenii
 ```
 
 Checking Tensorboard
