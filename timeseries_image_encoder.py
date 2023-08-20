@@ -138,11 +138,13 @@ class TimeSeries_ImageEncoderViT(ImageEncoderViT):
 
         # Stack the tensors back together into a single timeseries tensor again
         x = torch.stack(timeseries_tensors, dim = 1)
-        x = rearrange(x, 'b n h w d -> b n (h w d)')
+        x = rearrange(x, 'b n (h p1) (w p2) d -> (b h w) n (p1 p2 d)', p1=2, p2=2)
 
+        # Removing this, since it's losing too much information
+        # x = rearrange(x, 'b n h w d -> b n (h w d)')
         # Cut the first 2048 tokens, due to memory limits
         # 2048 since we have 8 * 8 * 32 (where 32 was generally the number of tokens representing a pixel in TSViT)
-        x = x[:, :, :self.dim_size]
+        #x = x[:, :, :self.dim_size]
         
         # Send it to temporal encoder here
         x = self.temporal_encoder(x)

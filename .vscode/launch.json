@@ -57,7 +57,7 @@
                 "--list_dir", "./lists/lists_PASTIS_timeseries",
                 "--num_classes", "20",
                 "--img_size", "128",
-                "--temporal_encoder_dim_size", "960",
+                "--temporal_encoder_dim_size", "3072",
                 "--warmup", 
                 "--AdamW"]
         },
