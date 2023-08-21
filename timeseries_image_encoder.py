@@ -150,8 +150,13 @@ class TimeSeries_ImageEncoderViT(ImageEncoderViT):
         x = self.temporal_encoder(x)
 
         # Reshaping the tensor to the original shape expected by SAM's image encoder
-        x = rearrange(x, 'b n (h w d) -> b h w (n d)', h=8, w=8)
-
+        # Essentially, reverting the rearrange performed prior to sending to temporal transformer
+        # Since the rearrange is only performed to split the 8x8 into smaller 2x2 sub-patches
+        # However, we are combining the temporal dimension and the token dimension hence (n d)
+        x = rearrange(x, '(b h w) n (p1 p2 d) -> b (h p1) (w p2) (n d)', p1=2, p2=2, h=4, w=4)
+        
+        # Not required anymore, since fixed with the rearrange operation above
+        # x = rearrange(x, 'b n (h w d) -> b h w (n d)', h=8, w=8)
         # Cutting the first 768 tokens, since this is the original size of the patch embedding generated within SAM
         x = x[..., :768]
 

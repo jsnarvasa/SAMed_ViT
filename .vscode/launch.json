@@ -62,6 +62,26 @@
                 "--AdamW"]
         },
         {
+            "name": "Train (Linux) - TimeSeries GCP",
+            "type": "python",
+            "request": "launch",
+            "program": "/home/jesse/repos/SAMed-jnar/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--root_path", "/home/jesse/data/PASTIS/SAMed_timeseries", 
+                "--output", "/home/jesse/repos/SAMed-jnar/output", 
+                "--n_gpu", "1", 
+                "--batch_size", "4", 
+                "--num_workers", "0", 
+                "--list_dir", "./lists/lists_PASTIS_timeseries",
+                "--num_classes", "20",
+                "--img_size", "128",
+                "--temporal_encoder_dim_size", "3072",
+                "--warmup", 
+                "--AdamW"]
+        },
+        {
             "name": "Test (Linux) - Timeseries",
             "type": "python",
             "request": "launch",
