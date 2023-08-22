@@ -107,6 +107,12 @@ We appreciate the developers of [Segment Anything Model](https://github.com/face
 
 # Jesse Updates
 
+> 3072 appears to be the right dim size for the temporal transformer
+> This is because of the sub-patch splitting of 8x8 into 2x2, where each subpatch is dim size of 768
+> Therefore, the size when flattened to 1D will be 2x2x768 = 3072
+> This is more tolerable, compared to not sub-patching it, resulting in 8x8x3072
+
+
 Preprocessing command
 ```bash
 nohup python preprocess/preprocess_data_pastis.py > 20230726_preprocess.log 2>&1 &
