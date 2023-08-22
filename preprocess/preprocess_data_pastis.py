@@ -12,17 +12,17 @@ parser.add_argument('--timeseries', action='store_true',
 args = parser.parse_args()
 
 if args.timeseries:
-    IMAGE_PATH = '/home/narvjes/data/PASTIS/DATA_S2'
-    SEMANTIC_LABEL_PATH = '/home/narvjes/data/PASTIS/ANNOTATIONS'
-    SAVE_PATH = '/home/narvjes/data/PASTIS/SAMed_timeseries'
-    FILE_LISTS_PATH = '/home/narvjes/repos/SAMed-jnar/lists/lists_PASTIS_timeseries'
+    IMAGE_PATH = '/home/jesse/data/PASTIS/DATA_S2'
+    SEMANTIC_LABEL_PATH = '/home/jesse/data/PASTIS/ANNOTATIONS'
+    SAVE_PATH = '/home/jesse/data/PASTIS/SAMed_timeseries'
+    FILE_LISTS_PATH = '/home/jesse/repos/SAMed-jnar/lists/lists_PASTIS_timeseries'
     FILE_LISTS_NAME = 'train.txt'
-    METADATA_PATH = '/home/narvjes/data/PASTIS/metadata.geojson'
+    METADATA_PATH = '/home/jesse/data/PASTIS/metadata.geojson'
 else:
-    IMAGE_PATH = '/home/narvjes/data/PASTIS/DATA_S2'
-    SEMANTIC_LABEL_PATH = '/home/narvjes/data/PASTIS/ANNOTATIONS'
-    SAVE_PATH = '/home/narvjes/data/PASTIS/SAMed'
-    FILE_LISTS_PATH = '/home/narvjes/repos/SAMed-jnar/lists/lists_PASTIS'
+    IMAGE_PATH = '/home/jesse/data/PASTIS/DATA_S2'
+    SEMANTIC_LABEL_PATH = '/home/jesse/data/PASTIS/ANNOTATIONS'
+    SAVE_PATH = '/home/jesse/data/PASTIS/SAMed'
+    FILE_LISTS_PATH = '/home/jesse/repos/SAMed-jnar/lists/lists_PASTIS'
     FILE_LISTS_NAME = 'train.txt'
 
 # Source: https://docs.digitalearthafrica.org/en/latest/data_specs/Sentinel-2_Level-2A_specs.html
