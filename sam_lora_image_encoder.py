@@ -189,8 +189,8 @@ class LoRA_Sam(nn.Module):
         for w_B in self.w_Bs:
             nn.init.zeros_(w_B.weight)
 
-    def forward(self, batched_input, multimask_output, image_size):
-        return self.sam(batched_input, multimask_output, image_size)
+    def forward(self, batched_input, multimask_output, image_size, doy_batch):
+        return self.sam(batched_input, multimask_output, image_size, doy_batch)
 
 
     # def forward(self, x: Tensor) -> Tensor:

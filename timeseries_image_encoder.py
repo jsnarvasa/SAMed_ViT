@@ -2,6 +2,7 @@ from segment_anything.modeling import ImageEncoderViT
 import torch
 from torch import nn, einsum
 from einops import rearrange
+import torch.nn.functional as F
 
 
 class Attention(nn.Module):
@@ -82,6 +83,7 @@ class Transformer(nn.Module):
 class TimeSeries_ImageEncoderViT(ImageEncoderViT):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.temporal_pos_embedding = nn.Linear(366, 768)
 
     
     @classmethod
@@ -124,11 +126,19 @@ class TimeSeries_ImageEncoderViT(ImageEncoderViT):
         )
 
     
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, doy_batch: torch.Tensor) -> torch.Tensor:
         '''
         Need to override the existing forward method within the superclass
         Such that we are able to insert the timeseries transformer processing here
         '''
+
+        B, T = doy_batch.shape
+        doy_batch = doy_batch.to(torch.int64)
+        doy_batch_onehot = F.one_hot(doy_batch, num_classes = 366).to(torch.float32)
+        doy_batch_onehot = doy_batch_onehot.reshape(-1, 366)
+        temporal_pos_embedding = self.temporal_pos_embedding(doy_batch_onehot).reshape(B, T, 768)
+        temporal_pos_embedding = temporal_pos_embedding.unsqueeze(2).unsqueeze(2)
+
 
         # Need to split the input on a per observation basis, since patch_embed does not expect timeseries
         timeseries_tensors = x.split(split_size = 1, dim = 1)
@@ -138,6 +148,8 @@ class TimeSeries_ImageEncoderViT(ImageEncoderViT):
 
         # Stack the tensors back together into a single timeseries tensor again
         x = torch.stack(timeseries_tensors, dim = 1)
+        # Infusing the temporal_positional embeddings into the input
+        x += temporal_pos_embedding
         x = rearrange(x, 'b n (h p1) (w p2) d -> (b h w) n (p1 p2 d)', p1=2, p2=2)
 
         # Removing this, since it's losing too much information
