@@ -29,7 +29,7 @@ def calc_loss(outputs, low_res_label_batch, ce_loss, dice_loss, dice_weight:floa
 
 
 def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
-    from datasets.dataset_synapse import Synapse_dataset, RandomGenerator
+    from datasets.dataset_synapse import Synapse_dataset, RandomGenerator, Pad_Timeseries
     logging.basicConfig(filename=snapshot_path + "/log.txt", level=logging.INFO,
                         format='[%(asctime)s.%(msecs)03d] %(message)s', datefmt='%H:%M:%S')
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
@@ -40,7 +40,12 @@ def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
     # max_iterations = args.max_iterations
     db_train = Synapse_dataset(base_dir=args.root_path, list_dir=args.list_dir, split="train",
                                transform=transforms.Compose(
-                                   [RandomGenerator(output_size=[args.img_size, args.img_size], low_res=[low_res, low_res])]))
+                                   [
+                                       RandomGenerator(output_size=[args.img_size, args.img_size], low_res=[low_res, low_res]),
+                                       Pad_Timeseries(),
+                                    ]
+                                )
+                            )
     print("The length of train set is: {}".format(len(db_train)))
 
     def worker_init_fn(worker_id):
@@ -108,7 +113,7 @@ def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
 
             if iter_num % 20 == 0:
                 batch_item_num = 0
-                image = image_batch[batch_item_num, 0:1, :, :]
+                image = image_batch[batch_item_num, 0, 0:1, :, :]
                 image = (image - image.min()) / (image.max() - image.min())
                 writer.add_image('train/Image', image, iter_num)
                 output_masks = outputs['masks']

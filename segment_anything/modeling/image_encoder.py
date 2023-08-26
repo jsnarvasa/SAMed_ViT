@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from icecream import ic
+from einops import rearrange
 
 from typing import Optional, Tuple, Type
 
@@ -55,6 +56,15 @@ class ImageEncoderViT(nn.Module):
         """
         super().__init__()
         self.img_size = img_size
+
+        # Perform 1x1 convolution here, to ensure we get the same output width and height as input image
+        # But with the temporal and channel dimensions processed
+        self.temporal_channel_embed = nn.Conv2d(
+            in_channels=60*3,
+            out_channels=3,
+            kernel_size=(1, 1),
+            stride=(1, 1),
+        )
 
         self.patch_embed = PatchEmbed(
             kernel_size=(patch_size, patch_size),
@@ -105,6 +115,8 @@ class ImageEncoderViT(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = rearrange(x, 'b t c h w -> b (t c) h w')
+        x = self.temporal_channel_embed(x)
         x = self.patch_embed(x)  # pre embed: [1, 3, 1024, 1024], post embed: [1, 64, 64, 768]
         if self.pos_embed is not None:
             x = x + self.pos_embed

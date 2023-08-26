@@ -51,6 +51,39 @@ class RandomGenerator(object):
         low_res_label = torch.from_numpy(low_res_label.astype(np.float32))
         sample = {'image': image, 'label': label.long(), 'low_res_label': low_res_label.long()}
         return sample
+    
+
+class Pad_Timeseries(object):
+    def __init__(self, dtype=torch.float32):
+
+        self.dtype = dtype
+        return
+    
+
+    def __call__(self, sample):
+        image = sample['image']
+        # doy = sample['doy']
+
+        # Get the current length of timeseries observation
+        timeseries_length = image.shape[0]
+
+        diff = 60 - timeseries_length
+
+        if diff > 0:
+            # creates the shape of the padding that we need [diff, channel, height, width]
+            pad_shape = [diff] + list(image.shape)[1:]
+            image = torch.cat((image, torch.zeros(pad_shape, dtype=self.dtype)), dim = 0)
+            # doy_pad_shape = [diff] + list(doy.shape)[1:]
+            # doy = torch.cat((doy, torch.zeros(doy_pad_shape)), dim=0)
+        elif diff < 0:
+            # if for some reason, we have an instance where the number of timeseries observations is greater than 60
+            # we will just take the first 60 observations
+            image = image[:60, ...]
+            # doy = doy[:60, ...]
+        
+        sample['image'] = image
+        # sample['doy'] = doy
+        return sample
 
 
 class Synapse_dataset(Dataset):
