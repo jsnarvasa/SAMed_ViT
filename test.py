@@ -13,6 +13,7 @@ from utils import test_single_volume
 from importlib import import_module
 from segment_anything import sam_model_registry
 from datasets.dataset_synapse import Synapse_dataset
+from sklearn.metrics import confusion_matrix
 
 from icecream import ic
 
@@ -41,22 +42,105 @@ class_to_name = {
 }
 
 
+def confusion_mat(predicted, labels, n_classes):  # , unk_masks=None):
+    """
+                predicted
+            -----------------
+    labels |
+    """
+    #if unk_masks is not None:
+    #    predicted = predicted[unk_masks]
+    #    labels = labels[unk_masks]
+    cm = confusion_matrix(labels, predicted)
+    # cm_side = cm.shape[0]
+    rem = 0
+    if cm.shape[0] < n_classes:
+        batch_classes = np.unique(np.concatenate((predicted, labels))).tolist()
+        for i in range(n_classes):
+            # internal class missing
+            if (i - rem) < len(batch_classes):
+                if i < batch_classes[i-rem]:
+                    cm = np.insert(cm, i, 0., axis=0)
+                    cm = np.insert(cm, i, 0., axis=1)
+                    rem += 1
+                    i += 1
+            # outer class(es) missing
+            else:
+                diff = n_classes - rem - len(batch_classes)  # + 1
+                cm_side = cm.shape[0]
+                cm = np.concatenate((cm, np.zeros((diff, cm_side))), axis=0)
+                cm = np.concatenate((cm, np.zeros((cm_side + diff, diff))), axis=1)
+                break
+    return cm
+
+
+def get_prediction_splits(predicted, labels, n_classes):  # , unk_masks=None):  , per_class=False):
+    # if per_class:
+    #     TP, FP, TN, FN = get_prediction_metrics(predicted, labels, unk_mask=unk_mask, per_class=True)
+    # else:
+    #     TP, FP, TN, FN = get_prediction_metrics(predicted, labels, unk_mask=unk_mask, per_class=False)
+    
+    # TN = (allsum - rowsum - colsum + diag).astype(np.float32)
+    # ---------------------------------------------------------
+    cm = confusion_mat(predicted, labels, n_classes).astype(np.float32)
+    diag = np.diagonal(cm)
+    rowsum = cm.sum(axis=1)
+    colsum = cm.sum(axis=0)
+    # allsum = cm.sum()
+    TP = (diag).astype(np.float32)
+    FN = (rowsum - diag).astype(np.float32)
+    FP = (colsum - diag).astype(np.float32)
+    IOU = diag / (rowsum + colsum - diag)
+    micro_IOU = diag.sum() / (rowsum.sum() + colsum.sum() - diag.sum())
+    # ---------------------------------------------------------
+    #if unk_masks is not None:
+    #    predicted = predicted[unk_masks]
+    #    labels = labels[unk_masks]
+    num_total = []
+    num_correct = []
+    for class_ in range(n_classes):
+        idx = labels == class_
+        is_correct = predicted[idx] == labels[idx]
+        if is_correct.size == 0:
+            is_correct = np.array(0)
+        num_total.append(idx.sum())
+        num_correct.append(is_correct.sum())   # previously was .mean()
+    num_total = np.array(num_total).astype(np.float32)
+    num_correct = np.array(num_correct)
+    #if not per_class:
+    #    return TP.sum(), FP.sum(), FN.sum(), num_correct.sum(), num_total.sum(), IOU[~np.isnan(IOU)].mean()
+    return TP, FP, FN, num_correct, num_total, IOU, micro_IOU
+
+
 def inference(args, multimask_output, db_config, model, test_save_path=None):
     db_test = db_config['Dataset'](base_dir=args.volume_path, list_dir=args.list_dir, split='pastis_test_vol')
     testloader = DataLoader(db_test, batch_size=1, shuffle=False, num_workers=1)
     logging.info(f'{len(testloader)} test iterations per epoch')
     model.eval()
     metric_list = 0.0
+    label_list = []
+    prediction_list = []
     for i_batch, sampled_batch in tqdm(enumerate(testloader)):
         c, h, w = sampled_batch['image'].shape[1:]
         image, label, case_name = sampled_batch['image'], sampled_batch['label'], sampled_batch['case_name'][0]
-        metric_i = test_single_volume(image, label, model, classes=args.num_classes, multimask_output=multimask_output,
+        metric_i, label_i, prediction_i = test_single_volume(image, label, model, classes=args.num_classes, multimask_output=multimask_output,
                                       patch_size=[args.img_size, args.img_size], input_size=[args.input_size, args.input_size],
                                       test_save_path=test_save_path, case=case_name, z_spacing=db_config['z_spacing'])
         metric_list += np.array(metric_i)
+        label_list.append(label_i)
+        prediction_list.append(prediction_i)
         logging.info('idx %d case %s mean_dice %f mean_hd95 %f' % (
             i_batch, case_name, np.mean(metric_i, axis=0)[0], np.mean(metric_i, axis=0)[1]))
     metric_list = metric_list / len(db_test)
+
+    # Use the label_list and prediction_list to generate the confusion matrix
+    label_agg = torch.cat(label_list, dim=0).cpu()
+    prediction_agg = torch.cat(prediction_list, dim=0).cpu()
+
+    TP, FP, FN, num_correct, num_total, IOU, micro_IOU = get_prediction_splits(prediction_agg, label_agg, 19)
+    macro_IOU = IOU[~np.isnan(IOU)].mean()
+
+
     for i in range(1, args.num_classes + 1):
         try:
             logging.info('Mean class %d name %s mean_dice %f mean_hd95 %f' % (i, class_to_name[i], metric_list[i - 1][0], metric_list[i - 1][1]))
@@ -66,6 +150,7 @@ def inference(args, multimask_output, db_config, model, test_save_path=None):
     mean_hd95 = np.mean(metric_list, axis=0)[1]
     logging.info('Testing performance in best val model: mean_dice : %f mean_hd95 : %f' % (performance, mean_hd95))
     logging.info("Testing Finished!")
+    logging.info(f'Micro IOU: {str(micro_IOU)}, Macro_IOU: {str(macro_IOU)}')
     return 1
 
 
