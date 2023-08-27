@@ -38,7 +38,8 @@ class_to_name = {
     15: 'soybeans',
     16: 'orchard',
     17: 'mixed cereal',
-    18: 'sorghum'
+    18: 'sorghum',
+    19: 'void'
 }
 
 
@@ -112,7 +113,7 @@ def get_prediction_splits(predicted, labels, n_classes):  # , unk_masks=None):  
     return TP, FP, FN, num_correct, num_total, IOU, micro_IOU
 
 
-def inference(args, multimask_output, db_config, model, test_save_path=None):
+def inference(args, multimask_output, db_config, model, num_classes, test_save_path=None):
     db_test = db_config['Dataset'](base_dir=args.volume_path, list_dir=args.list_dir, split='pastis_test_vol')
     testloader = DataLoader(db_test, batch_size=1, shuffle=False, num_workers=1)
     logging.info(f'{len(testloader)} test iterations per epoch')
@@ -137,7 +138,7 @@ def inference(args, multimask_output, db_config, model, test_save_path=None):
     label_agg = torch.cat(label_list, dim=0).cpu()
     prediction_agg = torch.cat(prediction_list, dim=0).cpu()
 
-    TP, FP, FN, num_correct, num_total, IOU, micro_IOU = get_prediction_splits(prediction_agg, label_agg, 19)
+    TP, FP, FN, num_correct, num_total, IOU, micro_IOU = get_prediction_splits(prediction_agg, label_agg, num_classes)
     macro_IOU = IOU[~np.isnan(IOU)].mean()
 
 
@@ -246,4 +247,4 @@ if __name__ == '__main__':
         os.makedirs(test_save_path, exist_ok=True)
     else:
         test_save_path = None
-    inference(args, multimask_output, dataset_config[dataset_name], net, test_save_path)
+    inference(args, multimask_output, dataset_config[dataset_name], net, args.num_classes, test_save_path)
