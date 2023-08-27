@@ -9,11 +9,20 @@ import datetime
 parser = argparse.ArgumentParser()
 parser.add_argument('--timeseries', action='store_true',
                     help='Whether to include timeseries data')
+parser.add_argument('--full_channels', action='store_true',
+                    help='Whether to include all channels')
 args = parser.parse_args()
 
-if args.timeseries:
+if args.full_channels and not args.timeseries:
+    raise ValueError('Cannot include full channels without timeseries data')
+
+if args.timeseries and not args.full_channels:
     SAVE_PATH = '/home/narvjes/data/PASTIS/SAMed_timeseries'
     FILE_LISTS_PATH = '/home/narvjes/repos/SAMed-jnar/lists/lists_PASTIS_timeseries'
+    METADATA_PATH = '/home/narvjes/data/PASTIS/metadata.geojson'
+elif args.timeseries and args.full_channels:
+    SAVE_PATH = '/home/narvjes/data/PASTIS/SAMed_timeseries_full_channels'
+    FILE_LISTS_PATH = '/home/narvjes/repos/SAMed-jnar/lists/lists_PASTIS_timeseries_full_channels'
     METADATA_PATH = '/home/narvjes/data/PASTIS/metadata.geojson'
 else:
     SAVE_PATH = '/home/jesse/data/PASTIS/SAMed'
@@ -52,35 +61,59 @@ if args.timeseries:
     with open(f'{METADATA_PATH}', 'r') as f:
         metadata_dict = json.load(f)
 
+
+def calculate_ndvi(near_infrared_channel: np.array, red_channel: np.array) -> np.array:
+    '''
+    Calculates the Normalised Difference Vegetation Index (NDVI) from the near-infrared and red channels
+    '''
+
+    # Source: https://docs.digitalearthafrica.org/en/latest/data_specs/Sentinel-2_Level-2A_specs.html
+    MIN_VALUE = -1
+    MAX_VALUE = 1
+
+    ndvi_channel = np.divide(
+                        (near_infrared_channel - red_channel).astype('float64'),
+                        (near_infrared_channel + red_channel).astype('float64'),
+                        out=np.zeros_like(near_infrared_channel.astype('float64')),
+                        where=(near_infrared_channel + red_channel) !=0
+                    )
+
+    ndvi_channel_normalised = (ndvi_channel - MIN_VALUE)/(MAX_VALUE - MIN_VALUE)
+
+    # Clip the values to be between 0 and 1, since they would be extreme from the normalised NDVI values
+    ndvi_channel_normalised = np.clip(S2_image_normalised, 0, 1)
+    
+    return ndvi_channel_normalised
+
+
 for npy_file in S2_npy_files:
     print(f'Processing file {npy_file}')
     patch_id = npy_file.replace('S2_', '').replace('.npy', '')
 
-    # NDVI Channels
     if args.timeseries:
         # the shape will be [n_observations, height, width]
-        near_infrared_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[:,6,:,:]
-        red_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[:,2,:,:]
+
+        # NDVI Channels
+        if not args.full_channels:
+            near_infrared_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[:,6,:,:]
+            red_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[:,2,:,:]
+
+            S2_image_normalised = calculate_ndvi(near_infrared_channel, red_channel)
+
+        # Full channels
+        # Not actually normalised, TO DO normalise
+        else:
+            S2_image_normalised = np.load(os.path.join(IMAGE_PATH, npy_file))
+
     else:
         # the shape will be [height, width]
         # i.e. there will be no timeseries dimension
         near_infrared_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[0,6,:,:]
         red_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[0,2,:,:]
 
-    ndvi_channel = np.divide(
-        (near_infrared_channel - red_channel).astype('float64'),
-        (near_infrared_channel + red_channel).astype('float64'),
-        out=np.zeros_like(near_infrared_channel.astype('float64')),
-        where=(near_infrared_channel + red_channel) !=0
-    )
+        S2_image_normalised = calculate_ndvi(near_infrared_channel, red_channel)
 
-    
-    # Note that we are getting the first observation (index 0) of the S2 image
-    S2_image = ndvi_channel
-    S2_image_normalised = (S2_image - MIN_VALUE)/(MAX_VALUE - MIN_VALUE)
 
-    # Clip the values to be between 0 and 1, since they would be extreme from the normalised NDVI values
-    S2_image_normalised = np.clip(S2_image_normalised, 0, 1)
 
     # Note that the reason we are getting the 0th channel
     # is because channel 0 for TARGET files is the semantic labels
