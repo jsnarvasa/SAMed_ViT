@@ -155,6 +155,18 @@ def test_single_volume(image, label, net, classes, multimask_output, patch_size=
         inputs = torch.from_numpy(image).unsqueeze(
             0).unsqueeze(2).float().cuda()
         inputs = repeat(inputs, 'b t c h w -> b t (repeat c) h w', repeat=3)
+
+        # Pad the timeseries to length of 60, to ensure consistency amongst all test subjects
+        timeseries_length = inputs.shape[1]
+        diff = 60 - timeseries_length
+
+        if diff > 0:
+            # creates the shape of the padding that we need [diff, channel, height, width]
+            pad_shape = [list(inputs.shape)[0]] + [diff] + list(inputs.shape)[2:]
+            inputs = torch.cat((inputs, torch.zeros(pad_shape).cuda()), dim = 1)
+        elif diff < 0:
+            inputs = inputs[:, :60, ...]
+            
         net.eval()
         with torch.no_grad():
             outputs = net(inputs, multimask_output, patch_size[0])

@@ -121,6 +121,9 @@ nohup python train.py  --root_path /home/narvjes/data/PASTIS/SAMed --output /hom
 # On the A40 GPU
 # The increase in max_epochs and stop_epoch is not necessary, just for testing
 nohup python train.py  --root_path /home/narvjes/data/PASTIS/SAMed --output /home/narvjes/repos/SAMed-jnar/output --n_gpu 1 --batch_size 16 --list_dir ./lists/lists_PASTIS --num_classes 20 --img_size 128 --stop_epoch 400 --max_epochs 450 --warmup --AdamW > 20230731_PASTIS_run.log 2>&1 &
+
+# For timeseries training
+nohup python train.py  --root_path /home/narvjes/data/PASTIS/SAMed_timeseries --output /home/narvjes/repos/SAMed-jnar/output --n_gpu 1 --batch_size 10 --list_dir ./lists/lists_PASTIS_timeseries --num_classes 20 --img_size 128 --stop_epoch 200 --max_epochs 250 --warmup --AdamW > 20230807_PASTIS_run.log 2>&1 &
 ```
 
 Testing command
