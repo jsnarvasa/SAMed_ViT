@@ -48,7 +48,7 @@ def inference(args, multimask_output, db_config, model, test_save_path=None):
     model.eval()
     metric_list = 0.0
     for i_batch, sampled_batch in tqdm(enumerate(testloader)):
-        h, w = sampled_batch['image'].shape[1:]
+        c, h, w = sampled_batch['image'].shape[1:]
         image, label, case_name = sampled_batch['image'], sampled_batch['label'], sampled_batch['case_name'][0]
         metric_i = test_single_volume(image, label, model, classes=args.num_classes, multimask_output=multimask_output,
                                       patch_size=[args.img_size, args.img_size], input_size=[args.input_size, args.input_size],
