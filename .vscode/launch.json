@@ -79,6 +79,17 @@
             ]
         },
         {
+            "name": "Preprocessing Debug - Timeseries",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--timeseries"
+            ]
+        },
+        {
             "name": "Python: Current File (Mac)",
             "type": "python",
             "request": "launch",

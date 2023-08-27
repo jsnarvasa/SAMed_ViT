@@ -12,18 +12,17 @@ parser.add_argument('--timeseries', action='store_true',
 args = parser.parse_args()
 
 if args.timeseries:
-    IMAGE_PATH = '/home/narvjes/data/PASTIS/DATA_S2'
-    SEMANTIC_LABEL_PATH = '/home/narvjes/data/PASTIS/ANNOTATIONS'
     SAVE_PATH = '/home/narvjes/data/PASTIS/SAMed_timeseries'
     FILE_LISTS_PATH = '/home/narvjes/repos/SAMed-jnar/lists/lists_PASTIS_timeseries'
-    FILE_LISTS_NAME = 'train.txt'
     METADATA_PATH = '/home/narvjes/data/PASTIS/metadata.geojson'
 else:
-    IMAGE_PATH = '/home/jesse/data/PASTIS/DATA_S2'
-    SEMANTIC_LABEL_PATH = '/home/jesse/data/PASTIS/ANNOTATIONS'
     SAVE_PATH = '/home/jesse/data/PASTIS/SAMed'
     FILE_LISTS_PATH = '/home/jesse/repos/SAMed-jnar/lists/lists_PASTIS'
-    FILE_LISTS_NAME = 'train.txt'
+
+IMAGE_PATH = '/home/narvjes/data/PASTIS/DATA_S2'
+SEMANTIC_LABEL_PATH = '/home/narvjes/data/PASTIS/ANNOTATIONS'
+FILE_LISTS_NAME = 'train.txt'
+FILE_LISTS_TEST_NAME = 'pastis_test_vol.txt'
 
 # Source: https://docs.digitalearthafrica.org/en/latest/data_specs/Sentinel-2_Level-2A_specs.html
 MIN_VALUE = -1
@@ -35,6 +34,14 @@ if not os.path.exists(SAVE_PATH):
 
 if not os.path.exists(FILE_LISTS_PATH):
     os.makedirs(FILE_LISTS_PATH)
+
+# Replace file if already exists, and create empty file
+# Do for both train and test files
+with open(os.path.join(FILE_LISTS_PATH, FILE_LISTS_NAME), 'w') as f:
+    pass
+with open(os.path.join(FILE_LISTS_PATH, FILE_LISTS_TEST_NAME), 'w') as f:
+    pass
+
 
 S2_files = os.listdir(IMAGE_PATH)
 S2_npy_files = [file for file in S2_files if file.endswith('.npy')]
@@ -105,12 +112,15 @@ for npy_file in S2_npy_files:
             label = S2_semantic_labels,
             image = S2_image_normalised,
         )
-    
 
-with open(os.path.join(FILE_LISTS_PATH, FILE_LISTS_NAME), 'w') as f:
-    for patch in S2_npy_files_filtered:
-        # Removing the .npy suffix from the text file, since just need S2_{patch_id}
-        # The train.py script will be responsible for appending the .npz extension to the filenames
-        f.write(patch.replace('.npy', '') + '\n')
+    # Removing the .npy suffix from the text file, since just need S2_{patch_id}
+    # The train.py script will be responsible for appending the .npz extension to the filenames
+    if patch_metadata['properties']['Fold'] in (1,2,3,4):
+        with open(os.path.join(FILE_LISTS_PATH, FILE_LISTS_NAME), 'a') as f:
+            f.write(npy_file.replace('.npy', '') + '\n')
+    elif patch_metadata['properties']['Fold'] == 5:
+        with open(os.path.join(FILE_LISTS_PATH, FILE_LISTS_TEST_NAME), 'a') as f:
+            f.write(npy_file.replace('.npy', '') + '\n')
+    
 
 print(f'Conversion of S2 files to .npz successful and txt file created in {FILE_LISTS_PATH}')
