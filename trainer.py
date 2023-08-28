@@ -83,7 +83,9 @@ def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
             low_res_label_batch = sampled_batch['low_res_label']
             image_batch, label_batch = image_batch.cuda(), label_batch.cuda()
             low_res_label_batch = low_res_label_batch.cuda()
-            assert image_batch.max() <= 3, f'image_batch max: {image_batch.max()}'
+            # Commenting out for now
+            # Since not performing normalisation
+            # assert image_batch.max() <= 3, f'image_batch max: {image_batch.max()}'
             outputs = model(image_batch, multimask_output, args.img_size)
             loss, loss_ce, loss_dice = calc_loss(outputs, low_res_label_batch, ce_loss, dice_loss, args.dice_param)
             optimizer.zero_grad()
