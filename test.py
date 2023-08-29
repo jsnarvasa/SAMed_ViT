@@ -122,7 +122,7 @@ def inference(args, multimask_output, db_config, model, num_classes, test_save_p
     label_list = []
     prediction_list = []
     for i_batch, sampled_batch in tqdm(enumerate(testloader)):
-        c, h, w = sampled_batch['image'].shape[1:]
+        t, c, h, w = sampled_batch['image'].shape[1:]
         image, label, case_name = sampled_batch['image'], sampled_batch['label'], sampled_batch['case_name'][0]
         metric_i, label_i, prediction_i = test_single_volume(image, label, model, classes=args.num_classes, multimask_output=multimask_output,
                                       patch_size=[args.img_size, args.img_size], input_size=[args.input_size, args.input_size],
@@ -220,8 +220,8 @@ if __name__ == '__main__':
     # register model
     sam, img_embedding_size = sam_model_registry[args.vit_name](image_size=args.img_size,
                                                                     num_classes=args.num_classes,
-                                                                    checkpoint=args.ckpt, pixel_mean=[0, 0, 0],
-                                                                    pixel_std=[1, 1, 1])
+                                                                    checkpoint=args.ckpt, pixel_mean=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                                                    pixel_std=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
     
     pkg = import_module(args.module)
     net = pkg.LoRA_Sam(sam, args.rank).cuda()
