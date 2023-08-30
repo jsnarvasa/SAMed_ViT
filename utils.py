@@ -183,4 +183,9 @@ def test_single_volume(image, label, net, classes, multimask_output, patch_size=
         np.save(os.path.join(test_save_path, case + '_img.npy'), image.astype(np.float32))
         np.save(os.path.join(test_save_path, case + '_lab.npy'), label.astype(np.float32))
                 
-    return metric_list
+    # Also send the label and prediction of the patch, as 1D tensor
+    # To allow for confusion matrix generation
+    label_1d = torch.from_numpy(label).view(-1).long().cuda()
+    prediction_1d = torch.from_numpy(prediction).view(-1).long().cuda()
+                
+    return metric_list, label_1d, prediction_1d
