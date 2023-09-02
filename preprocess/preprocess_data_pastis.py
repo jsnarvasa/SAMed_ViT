@@ -81,7 +81,7 @@ def calculate_ndvi(near_infrared_channel: np.array, red_channel: np.array) -> np
     ndvi_channel_normalised = (ndvi_channel - MIN_VALUE)/(MAX_VALUE - MIN_VALUE)
 
     # Clip the values to be between 0 and 1, since they would be extreme from the normalised NDVI values
-    ndvi_channel_normalised = np.clip(S2_image_normalised, 0, 1)
+    ndvi_channel_normalised = np.clip(ndvi_channel_normalised, 0, 1)
     
     return ndvi_channel_normalised
 
