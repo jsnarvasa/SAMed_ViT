@@ -13,6 +13,7 @@ from einops import rearrange
 from typing import Optional, Tuple, Type
 
 from .common import LayerNorm2d, MLPBlock
+from .temporal_transformer import Transformer
 
 
 # This class and its supporting functions below lightly adapted from the ViTDet backbone available at: https://github.com/facebookresearch/detectron2/blob/main/detectron2/modeling/backbone/vit.py # noqa
@@ -56,6 +57,14 @@ class ImageEncoderViT(nn.Module):
         """
         super().__init__()
         self.img_size = img_size
+
+        self.temporal_transformer = Transformer(
+            dim=2*2*3,
+            depth=4,
+            heads=4,
+            dim_head=32,
+            mlp_dim=2*2*3*4
+        )
 
         # Perform 1x1 convolution here, to ensure we get the same output width and height as input image
         # But with the temporal and channel dimensions processed
@@ -115,7 +124,15 @@ class ImageEncoderViT(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = rearrange(x, 'b t c h w -> b (t c) h w')
+        # Perform reshaping of original input tensor to create subpatches
+        # Subpatches done so we can input to temporal transformer
+        x = rearrange(x, 'b t c (h p1) (w p2) -> (b h w) t (c p1 p2)', p1=2, p2=2)
+
+        # Perform temporal transformer
+        x = self.temporal_transformer(x)
+
+        # Reshape output of temporal transformer to one for convolution
+        x = rearrange(x, '(b h w) t (c p1 p2) -> b (t c) (h p1) (w p2)', p1=2, p2=2, h=64, w=64)
         x = self.temporal_channel_embed(x)
         x = self.patch_embed(x)  # pre embed: [1, 3, 1024, 1024], post embed: [1, 64, 64, 768]
         if self.pos_embed is not None:
