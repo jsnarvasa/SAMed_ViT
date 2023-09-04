@@ -146,6 +146,7 @@ def load_from(sam, state_dict, image_size, vit_patch_size):
     pos_embed = new_state_dict['image_encoder.pos_embed']
     token_size = int(image_size // vit_patch_size)
     if pos_embed.shape[1] != token_size:
+        # This gets by-passed when using our saved model, since the original SAM weights have already been processed during training
         # resize pos embedding, which may sacrifice the performance, but I have no better idea
         pos_embed = pos_embed.permute(0, 3, 1, 2)  # [b, c, h, w]
         pos_embed = F.interpolate(pos_embed, (token_size, token_size), mode='bilinear', align_corners=False)
