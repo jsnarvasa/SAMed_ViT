@@ -133,7 +133,6 @@ def _build_sam(
     if checkpoint is not None:
         with open(checkpoint, "rb") as f:
             state_dict = torch.load(f)
-        state_dict = {k.replace('sam.', ''): v for k, v in state_dict.items()}
 
         if custom_checkpoint is not None:
             with open(custom_checkpoint, 'rb') as f:
@@ -144,6 +143,8 @@ def _build_sam(
                 pass
 
             state_dict.update(custom_state_dict)
+
+        state_dict = {k.replace('sam.', ''): v for k, v in state_dict.items()}
 
         try:
             sam.load_state_dict(state_dict)
