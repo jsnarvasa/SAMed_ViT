@@ -123,26 +123,35 @@ def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
                 writer.add_image('train/GroundTruth', labs, iter_num)
 
         save_interval = 5 # int(max_epoch/6)
+        CUSTOM_ITEMS = []
         if (epoch_num + 1) % save_interval == 0:
             save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '.pth')
-            sam_save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '_sam.pth')
+            sam_save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '_custom.pth')
+            if len(CUSTOM_ITEMS) > 0:
+                custom_state_dict = {k:v for k, v in model.state_dict().items() if CUSTOM_ITEMS[0] in k}
+            else:
+                custom_state_dict = {}
             try:
                 model.save_lora_parameters(save_mode_path)
-                torch.save(model.state_dict(), sam_save_mode_path)
+                torch.save(custom_state_dict, sam_save_mode_path)
             except:
                 model.module.save_lora_parameters(save_mode_path)
-                torch.save(model.state_dict(), sam_save_mode_path)
+                torch.save(custom_state_dict, sam_save_mode_path)
             logging.info("save model to {}".format(save_mode_path))
 
         if epoch_num >= max_epoch - 1 or epoch_num >= stop_epoch - 1:
             save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '.pth')
-            sam_save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '_sam.pth')
+            sam_save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '_custom.pth')
+            if len(CUSTOM_ITEMS) > 0:
+                custom_state_dict = {k:v for k, v in model.state_dict().items() if CUSTOM_ITEMS[0] in k}
+            else:
+                custom_state_dict = {}
             try:
                 model.save_lora_parameters(save_mode_path)
-                torch.save(model.state_dict(), sam_save_mode_path)
+                torch.save(custom_state_dict, sam_save_mode_path)
             except:
                 model.module.save_lora_parameters(save_mode_path)
-                torch.save(model.state_dict(), sam_save_mode_path)
+                torch.save(custom_state_dict, sam_save_mode_path)
             logging.info("save model to {}".format(save_mode_path))
             iterator.close()
             break
