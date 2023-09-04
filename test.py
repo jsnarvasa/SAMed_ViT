@@ -181,6 +181,7 @@ if __name__ == '__main__':
     parser.add_argument('--deterministic', type=int, default=1, help='whether use deterministic training')
     parser.add_argument('--ckpt', type=str, default='checkpoints/sam_vit_b_01ec64.pth',
                         help='Pretrained checkpoint')
+    parser.add_argument('--custom_ckpt', type=str, default=None, help='Path to custom checkpoint')
     parser.add_argument('--lora_ckpt', type=str, default='checkpoints/epoch_159.pth', help='The checkpoint from LoRA')
     parser.add_argument('--vit_name', type=str, default='vit_b', help='Select one vit model')
     parser.add_argument('--rank', type=int, default=4, help='Rank for LoRA adaptation')
@@ -221,7 +222,8 @@ if __name__ == '__main__':
     sam, img_embedding_size = sam_model_registry[args.vit_name](image_size=args.img_size,
                                                                     num_classes=args.num_classes,
                                                                     checkpoint=args.ckpt, pixel_mean=[0, 0, 0],
-                                                                    pixel_std=[1, 1, 1])
+                                                                    pixel_std=[1, 1, 1],
+                                                                    custom_checkpoint=args.custom_ckpt)
     
     pkg = import_module(args.module)
     net = pkg.LoRA_Sam(sam, args.rank).cuda()
