@@ -129,6 +129,7 @@ def _build_sam(
     if checkpoint is not None:
         with open(checkpoint, "rb") as f:
             state_dict = torch.load(f)
+        state_dict = {k.replace('sam.', ''): v for k, v in state_dict.items()}
         try:
             sam.load_state_dict(state_dict)
         except:
