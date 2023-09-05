@@ -14,7 +14,7 @@ from .modeling import ImageEncoderViT, MaskDecoder, PromptEncoder, Sam, TwoWayTr
 
 
 def build_sam_vit_h(image_size, num_classes, pixel_mean=[123.675, 116.28, 103.53], pixel_std=[58.395, 57.12, 57.375],
-                    checkpoint=None):
+                    checkpoint=None, custom_checkpoint=None):
     return _build_sam(
         encoder_embed_dim=1280,
         encoder_depth=32,
@@ -24,7 +24,8 @@ def build_sam_vit_h(image_size, num_classes, pixel_mean=[123.675, 116.28, 103.53
         num_classes=num_classes,
         image_size=image_size,
         pixel_mean=pixel_mean,
-        pixel_std=pixel_std
+        pixel_std=pixel_std,
+        custom_checkpoint=custom_checkpoint,
     )
 
 
@@ -32,7 +33,7 @@ build_sam = build_sam_vit_h
 
 
 def build_sam_vit_l(image_size, num_classes, pixel_mean=[123.675, 116.28, 103.53], pixel_std=[58.395, 57.12, 57.375],
-                    checkpoint=None):
+                    checkpoint=None, custom_checkpoint=None):
     return _build_sam(
         encoder_embed_dim=1024,
         encoder_depth=24,
@@ -42,12 +43,13 @@ def build_sam_vit_l(image_size, num_classes, pixel_mean=[123.675, 116.28, 103.53
         num_classes=num_classes,
         image_size=image_size,
         pixel_mean=pixel_mean,
-        pixel_std=pixel_std
+        pixel_std=pixel_std,
+        custom_checkpoint=custom_checkpoint,
     )
 
 
 def build_sam_vit_b(image_size, num_classes, pixel_mean=[123.675, 116.28, 103.53], pixel_std=[58.395, 57.12, 57.375],
-                    checkpoint=None):
+                    checkpoint=None, custom_checkpoint=None):
     return _build_sam(
         encoder_embed_dim=768,
         encoder_depth=12,
@@ -58,7 +60,8 @@ def build_sam_vit_b(image_size, num_classes, pixel_mean=[123.675, 116.28, 103.53
         num_classes=num_classes,
         image_size=image_size,
         pixel_mean=pixel_mean,
-        pixel_std=pixel_std
+        pixel_std=pixel_std,
+        custom_checkpoint=custom_checkpoint,
     )
 
 
@@ -80,6 +83,7 @@ def _build_sam(
         pixel_mean,
         pixel_std,
         checkpoint=None,
+        custom_checkpoint=None,
 ):
     prompt_embed_dim = 256
     image_size = image_size
@@ -129,11 +133,21 @@ def _build_sam(
     if checkpoint is not None:
         with open(checkpoint, "rb") as f:
             state_dict = torch.load(f)
+
+        if custom_checkpoint is not None:
+            with open(custom_checkpoint, 'rb') as f:
+                custom_state_dict = torch.load(f)
+
+            state_dict.update(custom_state_dict)
+
+        state_dict = {k.replace('sam.', ''): v for k, v in state_dict.items()}
+
         try:
             sam.load_state_dict(state_dict)
         except:
             new_state_dict = load_from(sam, state_dict, image_size, vit_patch_size)
             sam.load_state_dict(new_state_dict)
+    
     return sam, image_embedding_size
 
 

@@ -84,6 +84,12 @@ class LoRA_Sam(nn.Module):
         for param in sam_model.image_encoder.parameters():
             param.requires_grad = False
 
+        # Anything within the exception list, we need to allow gradients
+        EXCEPTION_LIST = ['temporal_channel_embed']
+        for name, param in sam_model.image_encoder.named_parameters():
+            if EXCEPTION_LIST[0] in name:
+                param.requires_grad = True
+
         # Here, we do the surgery
         for t_layer_i, blk in enumerate(sam_model.image_encoder.blocks):
             # If we only want few lora layer instead of all
