@@ -122,13 +122,13 @@ def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
                 labs = label_batch[batch_item_num, ...].unsqueeze(0) * 50
                 writer.add_image('train/GroundTruth', labs, iter_num)
 
-        save_interval = 50 # int(max_epoch/6)
-        CUSTOM_ITEMS = ['image_encoder.temporal_channel_embed']
+        save_interval = 25 # int(max_epoch/6)
+        CUSTOM_ITEMS = ['image_encoder.temporal_channel_embed', 'image_encoder.temporal_transformer']
         if (epoch_num + 1) % save_interval == 0:
             save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '.pth')
             sam_save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '_custom.pth')
             if len(CUSTOM_ITEMS) > 0:
-                custom_state_dict = {k:v for k, v in model.state_dict().items() if CUSTOM_ITEMS[0] in k}
+                custom_state_dict = {k:v for k, v in model.state_dict().items() if CUSTOM_ITEMS[0] in k or CUSTOM_ITEMS[1] in k}
             else:
                 custom_state_dict = {}
             try:
@@ -143,7 +143,7 @@ def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
             save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '.pth')
             sam_save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '_custom.pth')
             if len(CUSTOM_ITEMS) > 0:
-                custom_state_dict = {k:v for k, v in model.state_dict().items() if CUSTOM_ITEMS[0] in k}
+                custom_state_dict = {k:v for k, v in model.state_dict().items() if CUSTOM_ITEMS[0] in k or CUSTOM_ITEMS[1] in k}
             else:
                 custom_state_dict = {}
             try:
