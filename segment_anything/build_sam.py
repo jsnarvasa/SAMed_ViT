@@ -137,10 +137,6 @@ def _build_sam(
         if custom_checkpoint is not None:
             with open(custom_checkpoint, 'rb') as f:
                 custom_state_dict = torch.load(f)
-            try:
-                sam.load_state_dict(custom_state_dict)
-            except:
-                pass
 
             state_dict.update(custom_state_dict)
 
