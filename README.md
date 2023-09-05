@@ -107,6 +107,11 @@ We appreciate the developers of [Segment Anything Model](https://github.com/face
 
 # Jesse Updates
 
+> Important Note:
+> There are now two manually maintained lists, which keeps track of the custom components that have been added into the model.
+> These are `CUSTOM_ITEMS` and `EXCEPTION_LIST`, which are used to ensure that only the relevant component parameters are stored in the .pth export
+> and to ensure that the gradients within the custom components added within the Image Encoder do not have their weights frozen, respectively.
+
 Preprocessing command
 ```bash
 nohup python preprocess/preprocess_data_pastis.py > 20230726_preprocess.log 2>&1 &
