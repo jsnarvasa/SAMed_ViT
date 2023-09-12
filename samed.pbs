@@ -1,0 +1,19 @@
+#!/bin/bash
+#PBS -P VUR
+#PBS -N jnar3156_SAMed
+#PBS -l select=1:ncpus=2:ngpus=1:mem=16gb
+#PBS -l walltime=23:00:00
+#PBS -M jnar3156@uni.sydney.edu.au
+
+# Load the modules
+module load python/3.8.2
+
+source ~/venv_samed/bin/activate
+
+module load cuda/10.2.89
+
+export HOME_DIR="/project/RDS-FEI-VUR-RW/jnar3156/SAMed"
+cd $HOME_DIR
+
+NOW=$(date +"%Y-%m-%d_%T")
+python "${HOME_DIR}/train.py" --root_path "/project/RDS-FEI-VUR-RW/jnar3156/PASTIS/SAMed_timeseries" --output "${HOME_DIR}/output" --n_gpu 1 --batch_size 14 --num_workers 0 --list_dir "${HOME_DIR}/lists/lists_PASTIS_timeseries" --num_classes 20 --img_size 128 --warmup --AdamW > ~/"samed_${NOW}.log" 2>&1
