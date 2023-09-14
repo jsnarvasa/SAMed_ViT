@@ -58,6 +58,8 @@ class ImageEncoderViT(nn.Module):
         super().__init__()
         self.img_size = img_size
 
+        self.temporal_pos_embedding = nn.Linear(366, 2*2*3)
+
         self.temporal_transformer = Transformer(
             dim=2*2*3,
             depth=4,
@@ -123,10 +125,22 @@ class ImageEncoderViT(nn.Module):
             LayerNorm2d(out_chans),
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, doy_batch: torch.Tensor) -> torch.Tensor:
         # Perform reshaping of original input tensor to create subpatches
         # Subpatches done so we can input to temporal transformer
-        x = rearrange(x, 'b t c (h p1) (w p2) -> (b h w) t (c p1 p2)', p1=2, p2=2)
+
+        B, T = doy_batch.shape
+        doy_batch = doy_batch.to(torch.int64)
+        doy_batch_onehot = F.one_hot(doy_batch, num_classes = 366).to(torch.float32)
+        doy_batch_onehot = doy_batch_onehot.reshape(-1, 366)
+        temporal_pos_embedding = self.temporal_pos_embedding(doy_batch_onehot).reshape(B, T, 2*2*3)
+        temporal_pos_embedding = temporal_pos_embedding.unsqueeze(2)
+
+        # Temporarily reshape tensor to this format, for temporal pos embedding infusion
+        x = rearrange(x, 'b t c (h p1) (w p2) -> b t (h w) (c p1 p2)', p1=2, p2=2)
+        x += temporal_pos_embedding
+
+        x = rearrange(x, 'b t s d -> (b s) t d')
 
         # Perform temporal transformer
         x = self.temporal_transformer(x)

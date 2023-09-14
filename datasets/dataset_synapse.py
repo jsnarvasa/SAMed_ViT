@@ -33,13 +33,13 @@ class RandomGenerator(object):
         self.low_res = low_res
 
     def __call__(self, sample):
-        image, label = sample['image'], sample['label']
+        image, label, doy = sample['image'], sample['label'], sample['doy']
 
         if random.random() > 0.5:
             image, label = random_rot_flip(image, label)
         elif random.random() > 0.5:
             image, label = random_rotate(image, label)
-        c, x, y = image.shape
+        t, x, y = image.shape
         if x != self.output_size[0] or y != self.output_size[1]:
             image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
             label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
@@ -49,7 +49,7 @@ class RandomGenerator(object):
         image = repeat(image, 't c h w -> t (repeat c) h w', repeat=3)
         label = torch.from_numpy(label.astype(np.float32))
         low_res_label = torch.from_numpy(low_res_label.astype(np.float32))
-        sample = {'image': image, 'label': label.long(), 'low_res_label': low_res_label.long()}
+        sample = {'image': image, 'label': label.long(), 'low_res_label': low_res_label.long(), 'doy': doy}
         return sample
     
 
@@ -62,7 +62,7 @@ class Pad_Timeseries(object):
 
     def __call__(self, sample):
         image = sample['image']
-        # doy = sample['doy']
+        doy = sample['doy']
 
         # Get the current length of timeseries observation
         timeseries_length = image.shape[0]
@@ -73,16 +73,16 @@ class Pad_Timeseries(object):
             # creates the shape of the padding that we need [diff, channel, height, width]
             pad_shape = [diff] + list(image.shape)[1:]
             image = torch.cat((image, torch.zeros(pad_shape, dtype=self.dtype)), dim = 0)
-            # doy_pad_shape = [diff] + list(doy.shape)[1:]
-            # doy = torch.cat((doy, torch.zeros(doy_pad_shape)), dim=0)
+            doy_pad_shape = [diff] + list(doy.shape)[1:]
+            doy = torch.cat((doy, torch.zeros(doy_pad_shape)), dim=0)
         elif diff < 0:
             # if for some reason, we have an instance where the number of timeseries observations is greater than 60
             # we will just take the first 60 observations
             image = image[:60, ...]
-            # doy = doy[:60, ...]
+            doy = doy[:60, ...]
         
         sample['image'] = image
-        # sample['doy'] = doy
+        sample['doy'] = doy
         return sample
 
 
@@ -101,23 +101,28 @@ class Synapse_dataset(Dataset):
             slice_name = self.sample_list[idx].strip('\n')
             data_path = os.path.join(self.data_dir, slice_name+'.npz')
             data = np.load(data_path)
-            image, label = data['image'], data['label']
+            image, label, doy = data['image'], data['label'], data['doy']
         elif self.split == "pastis_test_vol":
             slice_name = self.sample_list[idx].strip('\n')
             data_path = os.path.join(self.data_dir, slice_name+'.npz')
             data = np.load(data_path)
-            image, label = data['image'], data['label'].astype('uint8')
+            image, label, doy = data['image'], data['label'].astype('uint8'), data['doy']
         else:
             vol_name = self.sample_list[idx].strip('\n')
             filepath = self.data_dir + "/{}.npy.h5".format(vol_name)
             data = h5py.File(filepath)
             image, label = data['image'][:], data['label'][:]
 
+        H, W = label.shape
+        doy_tensor_list = [torch.full((H, W), value) for value in doy]
+        doy = torch.stack(doy_tensor_list, dim=0)
+
         # Input dim should be consistent
         # Since the channel dimension of nature image is 3, that of medical image should also be 3
 
-        sample = {'image': image, 'label': label}
+        sample = {'image': image, 'label': label, 'doy': doy}
         if self.transform:
             sample = self.transform(sample)
         sample['case_name'] = self.sample_list[idx].strip('\n')
+        
         return sample

@@ -79,12 +79,13 @@ def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
         print(f'Starting epoch number {epoch_num} out of {max_epoch}')
 
         for i_batch, sampled_batch in enumerate(trainloader):
-            image_batch, label_batch = sampled_batch['image'], sampled_batch['label']  # [b, c, h, w], [b, h, w]
+            image_batch, label_batch, doy_batch = sampled_batch['image'], sampled_batch['label'], sampled_batch['doy']  # [b, c, h, w], [b, h, w]
             low_res_label_batch = sampled_batch['low_res_label']
-            image_batch, label_batch = image_batch.cuda(), label_batch.cuda()
+            doy_batch = doy_batch[:,:,0,0]
+            image_batch, label_batch, doy_batch = image_batch.cuda(), label_batch.cuda(), doy_batch.cuda()
             low_res_label_batch = low_res_label_batch.cuda()
             assert image_batch.max() <= 3, f'image_batch max: {image_batch.max()}'
-            outputs = model(image_batch, multimask_output, args.img_size)
+            outputs = model(image_batch, multimask_output, args.img_size, doy_batch)
             loss, loss_ce, loss_dice = calc_loss(outputs, low_res_label_batch, ce_loss, dice_loss, args.dice_param)
             optimizer.zero_grad()
             loss.backward()
@@ -123,12 +124,12 @@ def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
                 writer.add_image('train/GroundTruth', labs, iter_num)
 
         save_interval = 25 # int(max_epoch/6)
-        CUSTOM_ITEMS = ['image_encoder.temporal_channel_embed', 'image_encoder.temporal_transformer']
+        CUSTOM_ITEMS = ['image_encoder.temporal_channel_embed', 'image_encoder.temporal_transformer', 'image_encoder.temporal_pos_embedding']
         if (epoch_num + 1) % save_interval == 0:
             save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '.pth')
             sam_save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '_custom.pth')
             if len(CUSTOM_ITEMS) > 0:
-                custom_state_dict = {k:v for k, v in model.state_dict().items() if CUSTOM_ITEMS[0] in k or CUSTOM_ITEMS[1] in k}
+                custom_state_dict = {k:v for k, v in model.state_dict().items() if CUSTOM_ITEMS[0] in k or CUSTOM_ITEMS[1] in k or CUSTOM_ITEMS[2] in k}
             else:
                 custom_state_dict = {}
             try:
@@ -143,7 +144,7 @@ def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
             save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '.pth')
             sam_save_mode_path = os.path.join(snapshot_path, 'epoch_' + str(epoch_num) + '_custom.pth')
             if len(CUSTOM_ITEMS) > 0:
-                custom_state_dict = {k:v for k, v in model.state_dict().items() if CUSTOM_ITEMS[0] in k or CUSTOM_ITEMS[1] in k}
+                custom_state_dict = {k:v for k, v in model.state_dict().items() if CUSTOM_ITEMS[0] in k or CUSTOM_ITEMS[1] in k or CUSTOM_ITEMS[2] in k}
             else:
                 custom_state_dict = {}
             try:
