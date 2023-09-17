@@ -111,9 +111,10 @@ def calculate_metric_percase(pred, gt):
         return 0, 0
 
 
-def test_single_volume(image, label, net, classes, multimask_output, patch_size=[256, 256], input_size=[224, 224],
+def test_single_volume(image, label, doy, net, classes, multimask_output, patch_size=[256, 256], input_size=[224, 224],
                        test_save_path=None, case=None, z_spacing=1):
-    image, label = image.squeeze(0).cpu().detach().numpy(), label.squeeze(0).cpu().detach().numpy()
+    image, label, doy = image.squeeze(0).cpu().detach().numpy(), label.squeeze(0).cpu().detach().numpy(), doy.cpu().detach().numpy()
+    # Setting this to some dummy value for now, so it doesn't get hit
     if len(image.shape) == 10:
         prediction = np.zeros_like(label)
         for ind in range(image.shape[0]):
@@ -155,6 +156,7 @@ def test_single_volume(image, label, net, classes, multimask_output, patch_size=
         inputs = torch.from_numpy(image).unsqueeze(
             0).unsqueeze(2).float().cuda()
         inputs = repeat(inputs, 'b t c h w -> b t (repeat c) h w', repeat=3)
+        doy = torch.from_numpy(doy).cuda()
 
         # Pad the timeseries to length of 60, to ensure consistency amongst all test subjects
         timeseries_length = inputs.shape[1]
@@ -164,12 +166,19 @@ def test_single_volume(image, label, net, classes, multimask_output, patch_size=
             # creates the shape of the padding that we need [diff, channel, height, width]
             pad_shape = [list(inputs.shape)[0]] + [diff] + list(inputs.shape)[2:]
             inputs = torch.cat((inputs, torch.zeros(pad_shape).cuda()), dim = 1)
+            doy_pad_shape = [list(doy.shape)[0]] + [diff] + list(doy.shape)[2:]
+            doy = torch.cat((doy, torch.zeros(doy_pad_shape).cuda()), dim=1)
         elif diff < 0:
             inputs = inputs[:, :60, ...]
-            
+            doy = doy[:, :60, ...]
+
+        
+        # Flatten the doy tensor
+        doy = doy[:,:,0,0]
+
         net.eval()
         with torch.no_grad():
-            outputs = net(inputs, multimask_output, patch_size[0])
+            outputs = net(inputs, multimask_output, patch_size[0], doy)
             output_masks = outputs['masks']
             out = torch.argmax(torch.softmax(output_masks, dim=1), dim=1).squeeze(0)
             prediction = out.cpu().detach().numpy()
@@ -180,7 +189,7 @@ def test_single_volume(image, label, net, classes, multimask_output, patch_size=
         metric_list.append(calculate_metric_percase(prediction == i, label == i))
 
     if test_save_path is not None:
-        img_itk = sitk.GetImageFromArray(image.astype(np.float32))
+        img_itk = sitk.GetImageFromArray(image[0,...].astype(np.float32))
         prd_itk = sitk.GetImageFromArray(prediction.astype(np.float32))
         lab_itk = sitk.GetImageFromArray(label.astype(np.float32))
         img_itk.SetSpacing((1, 1, z_spacing))
@@ -192,7 +201,7 @@ def test_single_volume(image, label, net, classes, multimask_output, patch_size=
 
         # Also save numpy file
         np.save(os.path.join(test_save_path, case + '_pred.npy'), prediction.astype(np.float32))
-        np.save(os.path.join(test_save_path, case + '_img.npy'), image.astype(np.float32))
+        np.save(os.path.join(test_save_path, case + '_img.npy'), image[0,...].astype(np.float32))
         np.save(os.path.join(test_save_path, case + '_lab.npy'), label.astype(np.float32))
 
     # Also send the label and prediction of the patch, as 1D tensor

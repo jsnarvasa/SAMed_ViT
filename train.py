@@ -47,6 +47,7 @@ parser.add_argument('--vit_name', type=str,
 parser.add_argument('--ckpt', type=str, default='checkpoints/sam_vit_b_01ec64.pth',
                     help='Pretrained checkpoint')
 parser.add_argument('--lora_ckpt', type=str, default=None, help='Finetuned lora checkpoint')
+parser.add_argument('--custom_ckpt', type=str, default=None, help='Path to custom checkpoint')
 parser.add_argument('--rank', type=int, default=4, help='Rank for LoRA adaptation')
 parser.add_argument('--warmup', action='store_true', help='If activated, warp up the learning from a lower lr to the base_lr')
 parser.add_argument('--warmup_period', type=int, default=250,
@@ -100,7 +101,8 @@ if __name__ == "__main__":
     sam, img_embedding_size = sam_model_registry[args.vit_name](image_size=args.img_size,
                                                                 num_classes=args.num_classes,
                                                                 checkpoint=args.ckpt, pixel_mean=[0, 0, 0],
-                                                                pixel_std=[1, 1, 1])
+                                                                pixel_std=[1, 1, 1],
+                                                                custom_checkpoint=args.custom_ckpt,)
 
     pkg = import_module(args.module)
     net = pkg.LoRA_Sam(sam, args.rank).cuda()
