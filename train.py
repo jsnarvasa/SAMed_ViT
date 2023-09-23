@@ -99,8 +99,8 @@ if __name__ == "__main__":
     # register model
     sam, img_embedding_size = sam_model_registry[args.vit_name](image_size=args.img_size,
                                                                 num_classes=args.num_classes,
-                                                                checkpoint=args.ckpt, pixel_mean=[0, 0, 0],
-                                                                pixel_std=[1, 1, 1])
+                                                                checkpoint=args.ckpt, pixel_mean=[0, 0, 0,0,0,0,0,0,0,0],
+                                                                pixel_std=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
 
     pkg = import_module(args.module)
     net = pkg.LoRA_Sam(sam, args.rank).cuda()
