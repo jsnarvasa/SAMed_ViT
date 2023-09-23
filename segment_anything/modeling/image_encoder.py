@@ -71,7 +71,7 @@ class ImageEncoderViT(nn.Module):
         # Perform 1x1 convolution here, to ensure we get the same output width and height as input image
         # But with the temporal and channel dimensions processed
         self.temporal_channel_embed = nn.Conv2d(
-            in_channels=60*3,
+            in_channels=60*10,
             out_channels=3,
             kernel_size=(1, 1),
             stride=(1, 1),

@@ -100,8 +100,8 @@ if __name__ == "__main__":
     # register model
     sam, img_embedding_size = sam_model_registry[args.vit_name](image_size=args.img_size,
                                                                 num_classes=args.num_classes,
-                                                                checkpoint=args.ckpt, pixel_mean=[0, 0, 0],
-                                                                pixel_std=[1, 1, 1],
+                                                                checkpoint=args.ckpt, pixel_mean=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                                                pixel_std=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                                                                 custom_checkpoint=args.custom_ckpt,)
 
     pkg = import_module(args.module)

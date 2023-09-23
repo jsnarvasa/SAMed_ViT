@@ -11,13 +11,22 @@ from icecream import ic
 
 
 def random_rot_flip(image, label):
-    k = np.random.randint(0, 4)
-    image = np.rot90(image, k, axes=(1, 2))
-    label = np.rot90(label, k)
-    axis = np.random.randint(1, 3)
-    image = np.flip(image, axis=axis).copy()
-    label = np.flip(label, axis=axis-1).copy()
-    return image, label
+    if len(image.shape) == 3:
+        k = np.random.randint(0, 4)
+        image = np.rot90(image, k, axes=(1, 2))
+        label = np.rot90(label, k)
+        axis = np.random.randint(1, 3)
+        image = np.flip(image, axis=axis).copy()
+        label = np.flip(label, axis=axis-1).copy()
+        return image, label
+    elif len(image.shape) == 4:
+        k = np.random.randint(0, 4)
+        image = np.rot90(image, k, axes=(2, 3))
+        label = np.rot90(label, k)
+        axis = np.random.randint(2, 4)
+        image = np.flip(image, axis=axis).copy()
+        label = np.flip(label, axis=axis-2).copy()
+        return image, label
 
 
 def random_rotate(image, label):
@@ -39,16 +48,27 @@ class RandomGenerator(object):
             image, label = random_rot_flip(image, label)
         elif random.random() > 0.5:
             image, label = random_rotate(image, label)
-        t, x, y = image.shape
-        if x != self.output_size[0] or y != self.output_size[1]:
-            image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
-            label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
-        label_h, label_w = label.shape
-        low_res_label = zoom(label, (self.low_res[0] / label_h, self.low_res[1] / label_w), order=0)
-        image = torch.from_numpy(image.astype(np.float32)).unsqueeze(1)
-        image = repeat(image, 't c h w -> t (repeat c) h w', repeat=3)
-        label = torch.from_numpy(label.astype(np.float32))
-        low_res_label = torch.from_numpy(low_res_label.astype(np.float32))
+        if len(image.shape) == 3:
+            t, x, y = image.shape
+            if x != self.output_size[0] or y != self.output_size[1]:
+                image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
+                label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
+            label_h, label_w = label.shape
+            low_res_label = zoom(label, (self.low_res[0] / label_h, self.low_res[1] / label_w), order=0)
+            image = torch.from_numpy(image.astype(np.float32)).unsqueeze(1)
+            image = repeat(image, 't c h w -> t (repeat c) h w', repeat=3)
+            label = torch.from_numpy(label.astype(np.float32))
+            low_res_label = torch.from_numpy(low_res_label.astype(np.float32))
+        elif len(image.shape) == 4:
+            t, c, x, y = image.shape
+            if x != self.output_size[0] or y != self.output_size[1]:
+                image = zoom(image, (self.output_size[0] / x, self.output_size[1] / y), order=3)  # why not 3?
+                label = zoom(label, (self.output_size[0] / x, self.output_size[1] / y), order=0)
+            label_h, label_w = label.shape
+            low_res_label = zoom(label, (self.low_res[0] / label_h, self.low_res[1] / label_w), order=0)
+            image = torch.from_numpy(image.astype(np.float32))
+            label = torch.from_numpy(label.astype(np.float32))
+            low_res_label = torch.from_numpy(low_res_label.astype(np.float32))
         sample = {'image': image, 'label': label.long(), 'low_res_label': low_res_label.long(), 'doy': doy}
         return sample
     

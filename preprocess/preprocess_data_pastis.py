@@ -11,18 +11,27 @@ parser.add_argument('--timeseries', action='store_true',
                     help='Whether to include timeseries data')
 parser.add_argument('--full_channels', action='store_true',
                     help='Whether to include all channels')
+parser.add_argument('--full_channels_normalise', action='store_true',
+                    help='Whether to include all channels, and normalise them')
 args = parser.parse_args()
 
 if args.full_channels and not args.timeseries:
     raise ValueError('Cannot include full channels without timeseries data')
 
-if args.timeseries and not args.full_channels:
+if args.full_channels_normalise and not args.timeseries:
+    raise ValueError('Cannot include full channels without timeseries data')
+
+if args.timeseries and not args.full_channels and not args.full_channels_normalise:
     SAVE_PATH = '/home/narvjes/data/PASTIS/SAMed_timeseries'
     FILE_LISTS_PATH = '/home/narvjes/repos/SAMed-jnar/lists/lists_PASTIS_timeseries'
     METADATA_PATH = '/home/narvjes/data/PASTIS/metadata.geojson'
 elif args.timeseries and args.full_channels:
     SAVE_PATH = '/home/narvjes/data/PASTIS/SAMed_timeseries_full_channels'
     FILE_LISTS_PATH = '/home/narvjes/repos/SAMed-jnar/lists/lists_PASTIS_timeseries_full_channels'
+    METADATA_PATH = '/home/narvjes/data/PASTIS/metadata.geojson'
+elif args.timeseries and args.full_channels_normalise:
+    SAVE_PATH = '/home/narvjes/data/PASTIS/SAMed_timeseries_full_channels_normalised'
+    FILE_LISTS_PATH = '/home/narvjes/repos/SAMed-jnar/lists/lists_PASTIS_timeseries_full_channels_normalised'
     METADATA_PATH = '/home/narvjes/data/PASTIS/metadata.geojson'
 else:
     SAVE_PATH = '/home/jesse/data/PASTIS/SAMed'
@@ -94,16 +103,30 @@ for npy_file in S2_npy_files:
         # the shape will be [n_observations, height, width]
 
         # NDVI Channels
-        if not args.full_channels:
+        if not args.full_channels and not args.full_channels_normalise:
             near_infrared_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[:,6,:,:]
             red_channel = np.load(os.path.join(IMAGE_PATH, npy_file))[:,2,:,:]
 
             S2_image_normalised = calculate_ndvi(near_infrared_channel, red_channel)
 
         # Full channels
-        # Not actually normalised, TO DO normalise
-        else:
+        elif args.full_channels:
             S2_image_normalised = np.load(os.path.join(IMAGE_PATH, npy_file))
+
+        elif args.full_channels_normalise:
+            S2_image_normalised = np.load(os.path.join(IMAGE_PATH, npy_file))
+            channel_max = [943, 1266, 1535, 1786, 3023, 3596, 3831, 3918, 2938, 2114]
+            channel_min = [276, 500, 382, 863, 1810, 2050, 2175, 2298, 1612, 874]
+
+            for i in range(10):
+                S2_image_normalised[:,i,:,:] = np.divide(
+                    (S2_image_normalised[:,i,:,:] - channel_min[i]).astype('float64'),
+                    (np.array(channel_max[i]) - np.array(channel_min[i])).astype('float64'),
+                    out=np.zeros_like(S2_image_normalised[:,i,:,:]).astype('float64'),
+                    where=(channel_max[i] - channel_min[i]) !=0
+                )
+            
+            S2_image_normalised = np.clip(S2_image_normalised, 0, 1)
 
     else:
         # the shape will be [height, width]

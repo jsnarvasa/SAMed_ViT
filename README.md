@@ -143,6 +143,9 @@ nohup python test.py --num_classes 20 --list_dir ./lists/lists_PASTIS_timeseries
 
 # Testing for timeseries data, with the custom component checkpoint
 python test.py --num_classes 20 --list_dir ./lists/lists_PASTIS_timeseries --img_size 128 --ckpt /home/narvjes/repos/SAMed-jnar/checkpoints/sam_vit_b_01ec64.pth --lora_ckpt '/home/narvjes/repos/SAMed-jnar/output/Synapse_128_pretrain_vit_b_epo250_bs16_lr0.005_2023-09-05/epoch_199.pth' --custom_ckpt '/home/narvjes/repos/SAMed-jnar/output/Synapse_128_pretrain_vit_b_epo250_bs16_lr0.005_2023-09-05/epoch_199_custom.pth' --output_dir /home/narvjes/repos/SAMed-jnar/output/test --volume_path /home/narvjes/data/PASTIS/SAMed_timeseries --is_savenii
+
+# Testing for timeseries data, with the custom component checkpoint and also with full channels normalised
+python test.py --num_classes 20 --list_dir ./lists/lists_PASTIS_timeseries_full_channels_normalised --img_size 128 --ckpt /home/narvjes/repos/SAMed-jnar/checkpoints/sam_vit_b_01ec64.pth --lora_ckpt '/home/narvjes/repos/SAMed-jnar/output/Synapse_128_pretrain_vit_b_epo450_bs64_lr0.005_2023-09-19/epoch_199.pth' --custom_ckpt '/home/narvjes/repos/SAMed-jnar/output/Synapse_128_pretrain_vit_b_epo450_bs64_lr0.005_2023-09-19/epoch_199_custom.pth' --output_dir /home/narvjes/repos/SAMed-jnar/output/test --volume_path /home/narvjes/data/PASTIS/SAMed_timeseries_full_channels_normalised --is_savenii
 ```
 
 Checking Tensorboard

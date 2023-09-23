@@ -153,9 +153,10 @@ def test_single_volume(image, label, doy, net, classes, multimask_output, patch_
         x, y = image.shape[-2:]
         if x != patch_size[0] or y != patch_size[1]:
             image = zoom(image, (patch_size[0] / x, patch_size[1] / y), order=3)
-        inputs = torch.from_numpy(image).unsqueeze(
-            0).unsqueeze(2).float().cuda()
-        inputs = repeat(inputs, 'b t c h w -> b t (repeat c) h w', repeat=3)
+        inputs = torch.from_numpy(image.astype(np.float32)).unsqueeze(0).cuda()
+        # inputs = torch.from_numpy(image).unsqueeze(
+            # 0).unsqueeze(2).float().cuda()
+        # inputs = repeat(inputs, 'b t c h w -> b t (repeat c) h w', repeat=3)
         doy = torch.from_numpy(doy).cuda()
 
         # Pad the timeseries to length of 60, to ensure consistency amongst all test subjects
