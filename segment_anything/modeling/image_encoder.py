@@ -58,14 +58,14 @@ class ImageEncoderViT(nn.Module):
         super().__init__()
         self.img_size = img_size
 
-        self.temporal_pos_embedding = nn.Linear(366, 2*2*3)
+        self.temporal_pos_embedding = nn.Linear(366, 2*2*10)
 
         self.temporal_transformer = Transformer(
-            dim=2*2*3,
+            dim=2*2*10,
             depth=4,
             heads=4,
             dim_head=32,
-            mlp_dim=2*2*3*4
+            mlp_dim=2*2*10*4
         )
 
         # Perform 1x1 convolution here, to ensure we get the same output width and height as input image
@@ -133,8 +133,12 @@ class ImageEncoderViT(nn.Module):
         doy_batch = doy_batch.to(torch.int64)
         doy_batch_onehot = F.one_hot(doy_batch, num_classes = 366).to(torch.float32)
         doy_batch_onehot = doy_batch_onehot.reshape(-1, 366)
-        temporal_pos_embedding = self.temporal_pos_embedding(doy_batch_onehot).reshape(B, T, 2*2*3)
+        temporal_pos_embedding = self.temporal_pos_embedding(doy_batch_onehot).reshape(B, T, 2*2*10)
         temporal_pos_embedding = temporal_pos_embedding.unsqueeze(2)
+
+        _, _, C, H, W = x.shape
+        h_1_2 = H // 2
+        w_1_2 = W // 2
 
         # Temporarily reshape tensor to this format, for temporal pos embedding infusion
         x = rearrange(x, 'b t c (h p1) (w p2) -> b t (h w) (c p1 p2)', p1=2, p2=2)
@@ -146,7 +150,7 @@ class ImageEncoderViT(nn.Module):
         x = self.temporal_transformer(x)
 
         # Reshape output of temporal transformer to one for convolution
-        x = rearrange(x, '(b h w) t (c p1 p2) -> b (t c) (h p1) (w p2)', p1=2, p2=2, h=64, w=64)
+        x = rearrange(x, '(b h w) t (c p1 p2) -> b (t c) (h p1) (w p2)', p1=2, p2=2, h=h_1_2, w=w_1_2)
         x = self.temporal_channel_embed(x)
         x = self.patch_embed(x)  # pre embed: [1, 3, 1024, 1024], post embed: [1, 64, 64, 768]
         if self.pos_embed is not None:

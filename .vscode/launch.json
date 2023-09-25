@@ -50,14 +50,14 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--root_path", "/home/narvjes/data/PASTIS/SAMed_timeseries_full_channels", 
+                "--root_path", "/home/narvjes/data/PASTIS24/SAMed_timeseries_full_channels_normalised", 
                 "--output", "/home/narvjes/repos/SAMed-jnar/output", 
                 "--n_gpu", "1", 
                 "--batch_size", "1", 
                 "--num_workers", "0", 
-                "--list_dir", "./lists/lists_PASTIS_timeseries_full_channels",
+                "--list_dir", "./lists/lists_PASTIS24_timeseries_full_channels_normalised",
                 "--num_classes", "20",
-                "--img_size", "128",
+                "--img_size", "24",
                 "--warmup", 
                 "--AdamW"]
         },
