@@ -77,7 +77,7 @@ class ImageEncoderViT(nn.Module):
             stride=(1, 1),
         )
 
-        self.temporal_normalisation = nn.LayerNorm(3)
+        self.temporal_normalisation = nn.LayerNorm(2*2*10)
 
         self.patch_embed = PatchEmbed(
             kernel_size=(patch_size, patch_size),
@@ -151,6 +151,8 @@ class ImageEncoderViT(nn.Module):
         # Perform temporal transformer
         x = self.temporal_transformer(x)
 
+        # Perform normalisation of the transformer output
+        # Since CNN generally expects a normalised input, and can converge very slowly if not normalised
         x = self.temporal_normalisation(x)
 
         # Reshape output of temporal transformer to one for convolution
