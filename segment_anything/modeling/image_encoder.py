@@ -77,6 +77,8 @@ class ImageEncoderViT(nn.Module):
             stride=(1, 1),
         )
 
+        self.temporal_normalisation = nn.LayerNorm(3)
+
         self.patch_embed = PatchEmbed(
             kernel_size=(patch_size, patch_size),
             stride=(patch_size, patch_size),
@@ -148,6 +150,8 @@ class ImageEncoderViT(nn.Module):
 
         # Perform temporal transformer
         x = self.temporal_transformer(x)
+
+        x = self.temporal_normalisation(x)
 
         # Reshape output of temporal transformer to one for convolution
         x = rearrange(x, '(b h w) t (c p1 p2) -> b (t c) (h p1) (w p2)', p1=2, p2=2, h=h_1_2, w=w_1_2)

@@ -83,9 +83,9 @@ class LoRA_Sam(nn.Module):
             param.requires_grad = False
 
         # Anything within the exception list, we need to allow gradients
-        EXCEPTION_LIST = ['temporal_channel_embed', 'temporal_transformer', 'temporal_pos_embedding']
+        EXCEPTION_LIST = ['temporal_channel_embed', 'temporal_transformer', 'temporal_pos_embedding', 'temporal_normalisation']
         for name, param in sam_model.image_encoder.named_parameters():
-            if EXCEPTION_LIST[0] in name or EXCEPTION_LIST[1] in name or EXCEPTION_LIST[2] in name:
+            if EXCEPTION_LIST[0] in name or EXCEPTION_LIST[1] in name or EXCEPTION_LIST[2] in name or EXCEPTION_LIST[3] in name:
                 param.requires_grad = True
 
         # Here, we do the surgery
