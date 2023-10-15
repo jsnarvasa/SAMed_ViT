@@ -186,7 +186,7 @@ def test_single_volume(image, label, doy, net, classes, multimask_output, patch_
             if x != patch_size[0] or y != patch_size[1]:
                 prediction = zoom(prediction, (x / patch_size[0], y / patch_size[1]), order=0)
     metric_list = []
-    for i in range(1, classes + 1):
+    for i in range(1, classes):
         metric_list.append(calculate_metric_percase(prediction == i, label == i))
 
     if test_save_path is not None:

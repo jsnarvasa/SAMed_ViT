@@ -142,7 +142,7 @@ def inference(args, multimask_output, db_config, model, num_classes, test_save_p
     macro_IOU = IOU[~np.isnan(IOU)].mean()
 
 
-    for i in range(1, args.num_classes + 1):
+    for i in range(1, args.num_classes):
         try:
             logging.info('Mean class %d name %s mean_dice %f mean_hd95 %f' % (i, class_to_name[i], metric_list[i - 1][0], metric_list[i - 1][1]))
         except:

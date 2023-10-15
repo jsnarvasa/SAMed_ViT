@@ -100,6 +100,25 @@
             ]
         },
         {
+            "name": "Test (Linux) - Timeseries (Full Channels Normalised)",
+            "type": "python",
+            "request": "launch",
+            "program": "/home/narvjes/repos/SAMed-jnar/test.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--num_classes", "20",
+                "--list_dir", "./lists/lists_PASTIS24_timeseries_full_channels_normalised",
+                "--img_size", "24",
+                "--ckpt", "/home/narvjes/repos/SAMed-jnar/checkpoints/sam_vit_b_01ec64.pth",
+                "--lora_ckpt", "/home/narvjes/repos/SAMed-jnar/output/Synapse_24_pretrain_vit_b_epo650_bs42_lr0.005_2023-09-25/epoch_599.pth",
+                "--custom_ckpt", "/home/narvjes/repos/SAMed-jnar/output/Synapse_24_pretrain_vit_b_epo650_bs42_lr0.005_2023-09-25/epoch_599_custom.pth",
+                "--output_dir", "/home/narvjes/repos/SAMed-jnar/output/test",
+                "--volume_path", "/home/narvjes/data/PASTIS24/SAMed_timeseries_full_channels_normalised",
+                "--is_savenii"
+            ]
+        },
+        {
             "name": "Preprocessing Debug - Timeseries",
             "type": "python",
             "request": "launch",

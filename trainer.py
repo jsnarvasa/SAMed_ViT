@@ -1,12 +1,8 @@
-import argparse
 import logging
 import os
 import random
 import sys
-import time
-import math
 import datetime
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -57,7 +53,7 @@ def trainer_synapse(args, model, snapshot_path, multimask_output, low_res):
         model = nn.DataParallel(model)
     model.train()
     ce_loss = CrossEntropyLoss()
-    dice_loss = DiceLoss(num_classes + 1)
+    dice_loss = DiceLoss(num_classes)
     if args.warmup:
         b_lr = base_lr / args.warmup_period
     else:

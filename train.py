@@ -1,5 +1,4 @@
 import argparse
-import logging
 import os
 import random
 import numpy as np
@@ -13,7 +12,6 @@ from sam_lora_image_encoder import LoRA_Sam
 from segment_anything import sam_model_registry
 
 from trainer import trainer_synapse
-from icecream import ic
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--root_path', type=str,
@@ -100,9 +98,11 @@ if __name__ == "__main__":
     # register model
     sam, img_embedding_size = sam_model_registry[args.vit_name](image_size=args.img_size,
                                                                 num_classes=args.num_classes,
-                                                                checkpoint=args.ckpt, pixel_mean=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                                                checkpoint=args.ckpt, 
+                                                                pixel_mean=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                                                 pixel_std=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                                                custom_checkpoint=args.custom_ckpt,)
+                                                                custom_checkpoint=args.custom_ckpt,
+                                                                )
 
     pkg = import_module(args.module)
     net = pkg.LoRA_Sam(sam, args.rank).cuda()
